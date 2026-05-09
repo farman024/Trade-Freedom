@@ -1178,7 +1178,7 @@ function demoReply(p){
   return reps[Math.floor(Math.random()*reps.length)];
 }
 async function callGemini(prompt,key){
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${encodeURIComponent(key)}`;
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`;
   const body={contents:[{role:"user",parts:[{text:`You are a trading mindset coach. Be concise, direct, no fluff, max 3 sentences. Focus on discipline, patience, risk management. User: ${prompt}`}]}],generationConfig:{temperature:0.7,maxOutputTokens:200}};
   const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!res.ok)throw new Error('API error '+res.status);
@@ -1198,7 +1198,7 @@ async function sendMessage(){
 document.getElementById('sendChatBtn').addEventListener('click',sendMessage);
 chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage();}});
 document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{chatInput.value=ch.dataset.prompt;sendMessage();}));
-addMsg('assistant',"Ready. Ask about discipline, FOMO, patience, or losing streaks. Patience > Predictions. 🔥");
+addMsg('assistant',"Ready. Ask about discipline, FOMO, patience, or losing streaks. Patience > Predictions.");
 
 // ── EXPORT / IMPORT ──
 document.getElementById('exportBtn').addEventListener('click',()=>{
