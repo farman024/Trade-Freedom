@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Freedom — Trader Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#03080a; --bg2:#071014; --card:#0a1a1f; --card2:#0d2028;
+  --text:#dff5ec; --muted:#6a9e8a; --dim:#3a6655;
+  --neon:#00ffaa; --neon-rgb:0,255,170;
+  --neon2:#00cfff; --neon2-rgb:0,207,255;
+  --gold:#ffd166; --red:#ff4d6d;
+  --border:rgba(0,255,170,0.14); --border2:rgba(0,207,255,0.12);
+  --shadow:0 8px 40px rgba(0,0,0,0.6); --glow:0 0 24px rgba(0,255,170,0.18);
+}
+[data-theme="light"] {
+  --bg:#f0f7f4; --bg2:#e4f0eb; --card:#ffffff; --card2:#f5faf7;
+  --text:#071a12; --muted:#3d7a62; --dim:#8ab8a4;
+  --neon:#007a50; --neon-rgb:0,122,80;
+  --neon2:#006a9e; --neon2-rgb:0,106,158;
+  --gold:#b07800; --red:#c0003a;
+  --border:rgba(0,122,80,0.2); --border2:rgba(0,106,158,0.18);
+  --shadow:0 8px 32px rgba(0,40,20,0.1); --glow:0 0 20px rgba(0,122,80,0.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Syne',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* BG */
+.bg-layer{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 900px 600px at 90% -5%,rgba(var(--neon-rgb),0.1) 0%,transparent 65%),
+  radial-gradient(ellipse 600px 700px at -5% 30%,rgba(var(--neon2-rgb),0.07) 0%,transparent 65%),
+  radial-gradient(ellipse 500px 400px at 50% 110%,rgba(var(--neon-rgb),0.05) 0%,transparent 65%),var(--bg)}
+.bg-grid{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0.025;
+  background-image:linear-gradient(var(--neon) 1px,transparent 1px),linear-gradient(90deg,var(--neon) 1px,transparent 1px);
+  background-size:48px 48px}
+[data-theme="light"] .bg-grid{opacity:0.04}
+
+/* HERO */
+.hero{position:relative;padding:60px 24px 28px;text-align:center;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:0}
+.brain-wrap{width:100%;max-width:340px;height:220px;position:relative;flex-shrink:0;margin-bottom:24px}
+#brainCanvas{width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:1;width:100%}
+@media(max-width:640px){
+  .brain-wrap{height:180px;max-width:260px;margin-bottom:20px}
+}
+.header-eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.25em;color:var(--neon);text-transform:uppercase;margin-bottom:12px;opacity:0.85}
+h1{font-size:clamp(36px,6vw,66px);font-weight:800;letter-spacing:-0.03em;line-height:1;
+  background:linear-gradient(135deg,var(--text) 0%,color-mix(in srgb,var(--text) 55%,var(--neon)) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px;
+  text-shadow:0 0 80px rgba(var(--neon-rgb),0.15)}
+.subtitle{color:var(--muted);font-size:15px;margin-bottom:20px;max-width:380px;margin-left:auto;margin-right:auto}
+.badge-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--neon);border-radius:999px;font-size:12px;font-weight:700;color:var(--neon);background:rgba(var(--neon-rgb),0.08);font-family:'Space Mono',monospace;letter-spacing:0.05em}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--neon);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.clock{display:inline-flex;gap:16px;align-items:center;padding:11px 20px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow),var(--glow)}
+.clock-time{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--neon);letter-spacing:0.04em}
+.clock-date{color:var(--muted);font-size:13px}
+.clock-sep{color:var(--dim)}
+
+/* THEME TOGGLE */
+.theme-toggle{position:fixed;top:16px;right:16px;width:46px;height:46px;display:grid;place-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);z-index:300;transition:transform .2s,box-shadow .2s}
+.theme-toggle:hover{transform:scale(1.08);box-shadow:var(--shadow),var(--glow)}
+.theme-toggle svg{width:20px;height:20px;stroke:var(--text)}
+
+/* VOICE TOGGLE */
+.voice-toggle{position:fixed;top:16px;right:70px;width:46px;height:46px;display:grid;place-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);z-index:300;transition:transform .2s,box-shadow .2s}
+.voice-toggle:hover{transform:scale(1.08)}
+.voice-toggle.active{border-color:var(--neon);background:rgba(var(--neon-rgb),0.1);box-shadow:var(--shadow),var(--glow)}
+.voice-toggle svg{width:20px;height:20px;stroke:var(--text);transition:stroke .2s}
+.voice-toggle.active svg{stroke:var(--neon)}
+
+/* LAYOUT */
+.container{max-width:1240px;margin:0 auto;padding:0 18px 48px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:24px}
+.col-4{grid-column:span 4} .col-6{grid-column:span 6} .col-8{grid-column:span 8} .col-12{grid-column:span 12}
+@media(max-width:900px){.col-4,.col-6,.col-8{grid-column:span 12}}
+@media(min-width:901px) and (max-width:1100px){.col-4{grid-column:span 6}}
+
+/* SECTION TITLE */
+.section-title{font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin:30px 0 10px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  animation:cardIn .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--neon-rgb),0.5),transparent);opacity:0;transition:opacity .3s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow),0 0 32px rgba(var(--neon-rgb),0.1);border-color:rgba(var(--neon-rgb),0.28);transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,border-color .3s}
+.card:hover::before{opacity:1}
+.card-accent{border-color:rgba(var(--neon2-rgb),0.18)}
+.card-accent::before{background:linear-gradient(90deg,transparent,rgba(var(--neon2-rgb),0.5),transparent)}
+.card-accent:hover{box-shadow:var(--shadow),0 0 32px rgba(var(--neon2-rgb),0.1);border-color:rgba(var(--neon2-rgb),0.32)}
+.card h2{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;margin-bottom:16px;letter-spacing:-0.01em}
+.card-icon{width:32px;height:32px;display:grid;place-items:center;background:rgba(var(--neon-rgb),0.1);border:1px solid rgba(var(--neon-rgb),0.2);border-radius:10px;font-size:15px;flex-shrink:0}
+.card-icon.blue{background:rgba(var(--neon2-rgb),0.1);border-color:rgba(var(--neon2-rgb),0.2)}
+
+/* INPUTS */
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase}
+input[type="date"],input[type="datetime-local"],input[type="text"],input[type="number"],input[type="password"],textarea,select{width:100%;padding:10px 13px;background:rgba(var(--neon-rgb),0.03);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:14px;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+select{cursor:pointer}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(var(--neon-rgb),0.12);background:rgba(var(--neon-rgb),0.05)}
+textarea{resize:vertical;min-height:80px}
+
+/* PASSWORD WRAP */
+.pw-wrap{position:relative;display:flex}
+.pw-wrap input{flex:1;padding-right:44px}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:grid;place-items:center;background:transparent;border:none;cursor:pointer;color:var(--muted);border-radius:8px;transition:color .2s}
+.pw-eye:hover{color:var(--neon)}
+.pw-eye svg{width:16px;height:16px;stroke:currentColor}
+
+/* BUTTONS */
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:rgba(var(--neon-rgb),0.1);border:1px solid rgba(var(--neon-rgb),0.35);color:var(--text);border-radius:11px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:transform .2s,background .2s,box-shadow .2s;white-space:nowrap;letter-spacing:0.02em}
+.btn:hover{transform:scale(1.03);background:rgba(var(--neon-rgb),0.18);box-shadow:0 0 14px rgba(var(--neon-rgb),0.22)}
+.btn:active{transform:scale(0.97)}
+.btn.ghost{background:transparent;border-color:var(--border);color:var(--muted)}
+.btn.ghost:hover{background:rgba(var(--neon-rgb),0.06);color:var(--text);box-shadow:none}
+.btn.danger{background:rgba(255,77,109,0.1);border-color:rgba(255,77,109,0.4);color:var(--red)}
+.btn.danger:hover{background:rgba(255,77,109,0.2);box-shadow:0 0 14px rgba(255,77,109,0.2)}
+.btn.blue{background:rgba(var(--neon2-rgb),0.1);border-color:rgba(var(--neon2-rgb),0.35)}
+.btn.blue:hover{background:rgba(var(--neon2-rgb),0.18);box-shadow:0 0 14px rgba(var(--neon2-rgb),0.22)}
+.btn svg{width:15px;height:15px}
+.icon-btn{width:36px;height:36px;display:grid;place-items:center;padding:0;border-radius:10px}
+.icon-btn.active{color:var(--neon);background:rgba(var(--neon-rgb),0.18)}
+.icon-btn.active svg{fill:currentColor}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.stat{background:rgba(var(--neon-rgb),0.05);border:1px solid var(--border);border-radius:14px;padding:13px 10px;text-align:center;transition:border-color .2s,background .2s}
+.stat:hover{border-color:rgba(var(--neon-rgb),0.3);background:rgba(var(--neon-rgb),0.09)}
+.stat .num{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--neon);line-height:1}
+.stat .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+
+/* MILESTONES */
+.milestones{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.milestone{padding:5px 12px;border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:700;color:var(--muted);background:transparent;font-family:'Space Mono',monospace;transition:all .3s;cursor:default}
+.milestone.active{color:#000;background:var(--neon);border-color:var(--neon);box-shadow:0 0 18px rgba(var(--neon-rgb),0.5);transform:translateY(-1px)}
+
+/* QUOTES */
+.quote-box{min-height:110px;display:flex;flex-direction:column;justify-content:center;padding:18px;background:rgba(var(--neon-rgb),0.04);border:1px dashed rgba(var(--neon-rgb),0.2);border-radius:14px;margin:12px 0;position:relative}
+.quote-box::before{content:'"';position:absolute;top:8px;left:14px;font-size:60px;line-height:1;color:rgba(var(--neon-rgb),0.1);font-family:Georgia,serif;pointer-events:none}
+.quote-text{font-size:15px;line-height:1.65;font-weight:500;padding-left:10px}
+.quote-author{margin-top:8px;font-size:12px;color:var(--muted);font-style:italic;padding-left:10px}
+.quote-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:10px}
+.quote-nav{display:flex;gap:6px}
+.counter{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);padding:0 4px}
+
+/* REMINDERS */
+.reminder-list{list-style:none;margin:12px 0 0;max-height:190px;overflow:auto;display:flex;flex-direction:column;gap:7px}
+.reminder-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;background:rgba(var(--neon-rgb),0.04);border:1px solid var(--border);border-radius:11px}
+.reminder-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.reminder-time{font-family:'Space Mono',monospace;font-size:11px;color:var(--neon)}
+.reminder-msg{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* CHAT */
+.chat-box{height:210px;overflow-y:auto;padding:12px;background:rgba(0,0,0,0.18);border:1px solid var(--border);border-radius:14px;margin:12px 0;display:flex;flex-direction:column;gap:10px}
+[data-theme="light"] .chat-box{background:rgba(0,0,0,0.03)}
+.msg{display:flex}.msg.user{justify-content:flex-end}
+.bubble{max-width:82%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word}
+.msg.user .bubble{background:var(--neon);color:#000;border-bottom-right-radius:4px;font-weight:600}
+.msg.assistant .bubble{background:rgba(var(--neon-rgb),0.08);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{font-size:11px;padding:5px 10px;border:1px solid var(--border);background:transparent;border-radius:999px;cursor:pointer;color:var(--muted);font-family:inherit;transition:all .2s}
+.chip:hover{border-color:var(--neon);color:var(--neon);background:rgba(var(--neon-rgb),0.08)}
+.key-status{font-size:12px;color:var(--muted)}
+.key-status.active{color:var(--neon);font-weight:700}
+
+/* TIMER */
+.timer-display{font-family:'Space Mono',monospace;font-size:48px;font-weight:700;color:var(--neon);text-align:center;letter-spacing:0.04em;padding:16px 0 8px;text-shadow:0 0 30px rgba(var(--neon-rgb),0.4);transition:color .3s,text-shadow .3s}
+.timer-display.paused{color:var(--muted);text-shadow:none}
+.timer-controls{display:flex;justify-content:center;gap:10px;margin-bottom:14px}
+.session-log{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.session-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:9px 13px;background:rgba(var(--neon2-rgb),0.05);border:1px solid rgba(var(--neon2-rgb),0.15);border-radius:11px}
+.session-dur{font-family:'Space Mono',monospace;font-size:12px;color:var(--neon2);flex-shrink:0}
+.session-note{font-size:12px;color:var(--muted);flex:1}
+.session-date{font-size:11px;color:var(--dim);flex-shrink:0}
+
+/* EMOTION */
+.emotion-track{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
+.emotion-btn{width:52px;height:52px;border-radius:14px;border:2px solid var(--border);background:rgba(var(--neon-rgb),0.04);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .25s cubic-bezier(.16,1,.3,1);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--muted)}
+.emotion-btn:hover{transform:translateY(-3px) scale(1.06);border-color:var(--neon);color:var(--text)}
+.emotion-btn.selected{transform:translateY(-4px) scale(1.1)}
+.emotion-btn[data-v="1"].selected{background:rgba(255,77,109,0.18);border-color:#ff4d6d;color:#ff4d6d;box-shadow:0 8px 24px rgba(0,0,0,0.3),0 0 20px rgba(255,77,109,0.3)}
+.emotion-btn[data-v="2"].selected{background:rgba(255,120,60,0.18);border-color:#ff783c;color:#ff783c;box-shadow:0 8px 24px rgba(0,0,0,0.3),0 0 20px rgba(255,120,60,0.3)}
+.emotion-btn[data-v="3"].selected{background:rgba(255,209,102,0.18);border-color:#ffd166;color:#ffd166;box-shadow:0 8px 24px rgba(0,0,0,0.3),0 0 20px rgba(255,209,102,0.3)}
+.emotion-btn[data-v="4"].selected{background:rgba(80,220,140,0.18);border-color:#50dc8c;color:#50dc8c;box-shadow:0 8px 24px rgba(0,0,0,0.3),0 0 20px rgba(80,220,140,0.3)}
+.emotion-btn[data-v="5"].selected{background:rgba(var(--neon-rgb),0.18);border-color:var(--neon);color:var(--neon);box-shadow:0 8px 24px rgba(0,0,0,0.3),0 0 20px rgba(var(--neon-rgb),0.3)}
+.emotion-label{font-size:13px;text-align:center;color:var(--muted);min-height:20px;transition:color .2s}
+.emotion-log{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.emotion-item{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-radius:11px;border:1px solid var(--border)}
+.emotion-pill{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.ep-1{background:rgba(255,77,109,0.15);color:#ff4d6d} .ep-2{background:rgba(255,120,60,0.15);color:#ff783c}
+.ep-3{background:rgba(255,209,102,0.15);color:#ffd166} .ep-4{background:rgba(80,220,140,0.15);color:#50dc8c}
+.ep-5{background:rgba(var(--neon-rgb),0.15);color:var(--neon)}
+.emotion-note{font-size:12px;color:var(--muted);flex:1;padding:0 10px}
+.emotion-ts{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim)}
+
+/* WIN RATE */
+.wr-results{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.wr-stat{padding:14px 10px;border-radius:14px;text-align:center;border:1px solid var(--border);background:rgba(var(--neon-rgb),0.05)}
+.wr-stat .wr-num{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;color:var(--neon);line-height:1}
+.wr-stat .wr-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.wr-bar-wrap{margin-top:12px}
+.wr-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.wr-bar{height:8px;background:rgba(var(--neon-rgb),0.1);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.wr-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--neon),var(--neon2));transition:width .6s cubic-bezier(.16,1,.3,1)}
+.wr-history{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.wr-entry{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(var(--neon-rgb),0.04);border:1px solid var(--border);font-family:'Space Mono',monospace;font-size:12px}
+.wr-tag{padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700}
+.wr-tag.win{background:rgba(var(--neon-rgb),0.15);color:var(--neon)}
+.wr-tag.loss{background:rgba(255,77,109,0.15);color:var(--red)}
+.wr-tag.be{background:rgba(255,209,102,0.15);color:var(--gold)}
+
+/* RULES CHECKLIST */
+.rules-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--gold);border-radius:999px;font-size:12px;font-weight:700;color:var(--gold);background:rgba(255,209,102,0.08);font-family:'Space Mono',monospace}
+.rules-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
+.rule-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);border-radius:12px;background:rgba(var(--neon-rgb),0.03);transition:all .25s;cursor:pointer}
+.rule-item:hover{border-color:rgba(var(--neon-rgb),0.3);background:rgba(var(--neon-rgb),0.07)}
+.rule-item.checked{border-color:rgba(var(--neon-rgb),0.4);background:rgba(var(--neon-rgb),0.08)}
+.rule-check{width:22px;height:22px;border:2px solid var(--dim);border-radius:7px;display:grid;place-items:center;flex-shrink:0;transition:all .25s}
+.rule-item.checked .rule-check{background:var(--neon);border-color:var(--neon)}
+.rule-check svg{width:12px;height:12px;stroke:#000;opacity:0;transition:opacity .2s}
+.rule-item.checked .rule-check svg{opacity:1}
+.rule-text{font-size:14px;flex:1;transition:color .2s}
+.rule-item.checked .rule-text{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(var(--neon-rgb),0.4)}
+.rule-del{opacity:0;font-size:16px;color:var(--dim);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:6px;transition:opacity .2s,color .2s;font-family:inherit}
+.rule-item:hover .rule-del{opacity:1}
+.rule-del:hover{color:var(--red)}
+.add-rule-row{display:flex;gap:8px;margin-top:12px}
+.rules-progress{height:6px;background:rgba(var(--neon-rgb),0.1);border-radius:999px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border)}
+.rules-progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--neon),var(--neon2));transition:width .5s cubic-bezier(.16,1,.3,1)}
+.rules-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--muted)}
+
+/* NO TRADE TOGGLE */
+.no-trade-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 0 6px}
+.no-trade-toggle{width:90px;height:90px;border-radius:50%;border:3px solid var(--border);background:var(--card2);cursor:pointer;display:grid;place-items:center;font-size:36px;transition:all .35s cubic-bezier(.16,1,.3,1);position:relative;box-shadow:0 4px 20px rgba(0,0,0,0.4)}
+.no-trade-toggle:hover{transform:scale(1.06)}
+.no-trade-toggle.active{border-color:var(--red);background:rgba(255,77,109,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.4),0 0 30px rgba(255,77,109,0.35)}
+.no-trade-toggle.off-mode{border-color:var(--neon);background:rgba(var(--neon-rgb),0.1);box-shadow:0 4px 20px rgba(0,0,0,0.4),0 0 30px rgba(var(--neon-rgb),0.3)}
+.no-trade-label{font-size:14px;font-weight:700;margin-top:12px;text-align:center;transition:color .3s}
+.no-trade-label.trading{color:var(--neon)}
+.no-trade-label.notrade{color:var(--red)}
+.no-trade-reason-wrap{margin-top:14px;display:none}
+.no-trade-reason-wrap.show{display:block}
+.no-trade-log{max-height:140px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.no-trade-item{padding:9px 13px;border-radius:11px;border:1px solid var(--border);font-size:12px}
+.no-trade-item.notrade-entry{border-color:rgba(255,77,109,0.3);background:rgba(255,77,109,0.05)}
+.no-trade-item.trade-entry{border-color:rgba(var(--neon-rgb),0.3);background:rgba(var(--neon-rgb),0.05)}
+.nt-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);margin-bottom:3px}
+.nt-reason{color:var(--muted)}
+
+/* MANIFESTO */
+#manifestoText{min-height:100px;font-family:'Syne',sans-serif;font-size:15px;line-height:1.7}
+
+/* FOOTER */
+footer{max-width:1240px;margin:0 auto 32px;padding:20px 18px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+
+/* DOT */
+.dot{width:8px;height:8px;border-radius:50%;background:var(--neon);flex-shrink:0;box-shadow:0 0 0 0 rgba(var(--neon-rgb),0.7);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--neon-rgb),0.7)}70%{box-shadow:0 0 0 8px rgba(var(--neon-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--neon-rgb),0)}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(var(--neon-rgb),0.3)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;color:var(--dim);font-size:12px;padding:16px 0}
+
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .hero{min-height:420px;padding-top:52px}
+  #brainCanvas{height:320px}
+  .clock{flex-direction:column;gap:6px}
+  .timer-display{font-size:36px}
+  .emotion-btn{width:44px;height:44px}
+  .wr-results{grid-template-columns:1fr 1fr}
+  .voice-toggle{right:68px}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme"></button>
+<button id="voiceToggle" class="voice-toggle" type="button" aria-label="Toggle voice" title="AI Voice">🔇</button>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="brain-wrap">
+    <canvas id="brainCanvas"></canvas>
+  </div>
+  <div class="hero-content">
+    <div class="header-eyebrow">// trader's mindset dashboard</div>
+    <h1>Trade Freedom</h1>
+    <p class="subtitle">Leave the 9–5 mindset. Trade discipline, not desperation.</p>
+    <div class="badge-row">
+      <div class="badge"><span class="badge-dot"></span>Patience &gt; Predictions</div>
+      <div class="badge" style="border-color:rgba(var(--neon2-rgb),0.5);color:var(--neon2);background:rgba(var(--neon2-rgb),0.08)">Live Dashboard</div>
+    </div>
+    <div class="clock">
+      <span class="clock-time" id="clockTime">00:00:00</span>
+      <span class="clock-sep">|</span>
+      <span class="clock-date" id="clockDate"></span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="section-title">Journey & Mindset</div>
+  <div class="grid">
+
+    <!-- JOURNEY -->
+    <section class="card col-4">
+      <h2><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="1.8" width="18" height="18"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg></span> Trading Journey</h2>
+      <label for="startDate">Journey Start Date</label>
+      <div class="row" style="margin-bottom:12px">
+        <input type="date" id="startDate" style="flex:1">
+        <button class="btn ghost" id="setTodayBtn" type="button">Today</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num" id="years">0</div><div class="lbl">Years</div></div>
+        <div class="stat"><div class="num" id="months">0</div><div class="lbl">Months</div></div>
+        <div class="stat"><div class="num" id="days">0</div><div class="lbl">Days</div></div>
+        <div class="stat"><div class="num" id="totalDays">0</div><div class="lbl">Total</div></div>
+      </div>
+      <div class="milestones">
+        <div class="milestone" data-days="30">30D</div>
+        <div class="milestone" data-days="100">100D</div>
+        <div class="milestone" data-days="365">1Y</div>
+        <div class="milestone" data-days="1095">3Y</div>
+        <div class="milestone" data-days="1825">5Y</div>
+        <div class="milestone" data-days="3650">10Y</div>
+      </div>
+    </section>
+
+    <!-- QUOTES -->
+    <section class="card col-8">
+      <h2><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="1.8" width="18" height="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> Mindset Quotes</h2>
+      <div class="quote-box">
+        <div class="quote-text" id="quoteText"></div>
+        <div class="quote-author" id="quoteAuthor"></div>
+      </div>
+      <div class="quote-controls">
+        <div class="quote-nav">
+          <button class="btn icon-btn" id="quotePrev" type="button" title="Previous">‹</button>
+          <button class="btn icon-btn" id="quoteNext" type="button" title="Next">›</button>
+          <button class="btn ghost" id="quoteShuffle" type="button">Shuffle</button>
+        </div>
+        <div class="row">
+          <span class="counter" id="quoteCounter">1/10</span>
+          <button class="btn icon-btn" id="quoteFav" type="button" title="Favorite"></button>
+          <button class="btn icon-btn" id="quoteCopy" type="button" title="Copy"></button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;letter-spacing:0;cursor:pointer">
+          <input type="checkbox" id="autoRotate">
+          <span style="font-size:12px;color:var(--muted)">Auto-rotate every 15s</span>
+        </label>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <input type="text" id="customQuoteInput" placeholder="Add your trading truth..." style="flex:1">
+        <button class="btn" id="addQuoteBtn" type="button">Add</button>
+      </div>
+    </section>
+
+    <!-- MANIFESTO -->
+    <section class="card col-6">
+      <h2><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="1.8" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Freedom Manifesto</h2>
+      <textarea id="manifestoText" placeholder="Write your why..."></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="saveManifestoBtn" type="button">Save</button>
+        <button class="btn ghost" id="resetManifestoBtn" type="button">Reset</button>
+      </div>
+    </section>
+
+    <!-- REMINDERS -->
+    <section class="card col-6">
+      <h2><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="1.8" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Reminders</h2>
+      <div style="margin-bottom:8px"><label>When</label><input type="datetime-local" id="reminderTime"></div>
+      <label>Message</label>
+      <div class="row">
+        <input type="text" id="reminderMsg" placeholder="No FOMO, check your rules..." style="flex:1">
+        <button class="btn" id="addReminderBtn" type="button">Add</button>
+      </div>
+      <ul class="reminder-list" id="reminderList"></ul>
+    </section>
+
+  </div>
+
+  <div class="section-title">Discipline Tools</div>
+  <div class="grid">
+
+    <!-- DAILY RULES CHECKLIST -->
+    <section class="card col-6">
+      <div class="rules-header">
+        <h2 style="margin-bottom:0"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="1.8" width="18" height="18"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span> Daily Rules</h2>
+        <div class="streak-badge"><svg viewBox="0 0 24 24" fill="var(--gold)" stroke="var(--gold)" stroke-width="1" width="13" height="13"><path d="M12 2c0 0-4 5-4 9a4 4 0 0 0 8 0c0-4-4-9-4-9z"/><path d="M12 14c-1.1 0-2-.9-2-2 0-1.5 2-4 2-4s2 2.5 2 4c0 1.1-.9 2-2 2z" fill="var(--bg)"/></svg> <span id="streakCount">0</span> day streak</div>
+      </div>
+      <div class="rules-progress"><div class="rules-progress-fill" id="rulesProgressFill" style="width:0%"></div></div>
+      <div class="rules-list" id="rulesList"></div>
+      <div class="add-rule-row">
+        <input type="text" id="newRuleInput" placeholder="Add a trading rule..." style="flex:1">
+        <button class="btn" id="addRuleBtn" type="button">Add</button>
+      </div>
+      <div class="rules-footer">
+        <span id="rulesStatus">0 / 0 rules followed</span>
+        <button class="btn ghost" id="resetRulesBtn" type="button" style="font-size:11px;padding:5px 10px">Reset Day</button>
+      </div>
+    </section>
+
+    <!-- NO TRADE DAY TOGGLE -->
+    <section class="card col-6">
+      <h2><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="1.8" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Trade Mode</h2>
+      <div class="no-trade-wrap">
+        <button class="no-trade-toggle off-mode" id="noTradeToggle" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="2" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <div class="no-trade-label trading" id="noTradeLabel">Trading Today</div>
+      </div>
+      <div class="no-trade-reason-wrap" id="noTradeReasonWrap">
+        <label>Reason for No-Trade Day</label>
+        <div class="row">
+          <input type="text" id="noTradeReason" placeholder="Market unclear, emotional, news day..." style="flex:1">
+          <button class="btn danger" id="confirmNoTrade" type="button">Lock In</button>
+        </div>
+      </div>
+      <div class="no-trade-log" id="noTradeLog"></div>
+    </section>
+
+  </div>
+
+  <div class="section-title">Performance & State</div>
+  <div class="grid">
+
+    <!-- EMOTIONAL STATE -->
+    <section class="card col-4 card-accent">
+      <h2><span class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon2)" stroke-width="1.8" width="18" height="18"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Emotional State</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Rate your mindset before you trade. Patterns don't lie.</p>
+      <div class="emotion-track">
+        <button class="emotion-btn" data-v="1" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg><span>1</span></button>
+        <button class="emotion-btn" data-v="2" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg><span>2</span></button>
+        <button class="emotion-btn" data-v="3" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><line x1="8" y1="13" x2="16" y2="13"/><circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/></svg><span>3</span></button>
+        <button class="emotion-btn" data-v="4" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg><span>4</span></button>
+        <button class="emotion-btn" data-v="5" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><path d="M9 8.5c.5-.5 1.5-.5 2 0"/><path d="M13 8.5c.5-.5 1.5-.5 2 0"/></svg><span>5</span></button>
+      </div>
+      <div class="emotion-label" id="emotionLabel">Tap to rate your state</div>
+      <div style="display:flex;gap:8px;margin:10px 0">
+        <input type="text" id="emotionNote" placeholder="Note (optional)..." style="flex:1">
+        <button class="btn blue" id="logEmotionBtn" type="button">Log</button>
+      </div>
+      <div class="emotion-log" id="emotionLog"></div>
+    </section>
+
+    <!-- SESSION TIMER -->
+    <section class="card col-4 card-accent">
+      <h2><span class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon2)" stroke-width="1.8" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Session Timer</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Track your screen time. Time discipline matters.</p>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+      <div class="timer-controls">
+        <button class="btn blue" id="timerStart" type="button"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start</button>
+        <button class="btn ghost" id="timerPause" type="button" disabled><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause</button>
+        <button class="btn ghost" id="timerStop" type="button" disabled><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> Stop</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="sessionNote" placeholder="Session note..." style="flex:1">
+      </div>
+      <div class="session-log" id="sessionLog"></div>
+    </section>
+
+    <!-- WIN RATE -->
+    <section class="card col-4 card-accent">
+      <h2><span class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="var(--neon2)" stroke-width="1.8" width="18" height="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span> Win Rate Calc</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Log trades. Track your edge over time.</p>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="flex:1"><label>Outcome</label>
+          <select id="tradeOutcome">
+            <option value="win">Win</option>
+            <option value="loss">Loss</option>
+            <option value="be">Break Even</option>
+          </select>
+        </div>
+        <div style="flex:1"><label>R:R</label><input type="number" id="tradeRR" placeholder="e.g. 2.5" min="0" step="0.1"></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn blue" id="addTradeBtn" type="button">Add</button></div>
+      </div>
+      <div class="wr-results">
+        <div class="wr-stat"><div class="wr-num" id="wrRate">0%</div><div class="wr-lbl">Win Rate</div></div>
+        <div class="wr-stat"><div class="wr-num" id="wrAvgRR">0R</div><div class="wr-lbl">Avg R:R</div></div>
+        <div class="wr-stat"><div class="wr-num" id="wrExpect">0R</div><div class="wr-lbl">Expectancy</div></div>
+      </div>
+      <div class="wr-bar-wrap">
+        <div class="wr-bar-label"><span id="wrWins">0W</span><span id="wrLosses">0L</span><span id="wrBE">0BE</span></div>
+        <div class="wr-bar"><div class="wr-bar-fill" id="wrBarFill" style="width:0%"></div></div>
+      </div>
+      <div class="wr-history" id="wrHistory"></div>
+    </section>
+
+  </div>
+
+  <div class="section-title">AI Mindset Coach</div>
+  <div class="grid">
+    <section class="card col-12">
+      <h2><span class="dot"></span> AI Mindset Coach <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px">— Gemini powered</span></h2>
+      <div class="row" style="align-items:stretch;gap:8px;flex-wrap:wrap">
+        <div class="pw-wrap" style="flex:1;min-width:200px">
+          <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API Key...">
+          <button class="pw-eye" id="toggleEyeBtn" type="button" aria-label="Show/hide key"></button>
+        </div>
+        <button class="btn" id="saveKeyBtn" type="button">Save Key</button>
+        <button class="btn ghost" id="forgetKeyBtn" type="button">Forget</button>
+        <span class="key-status" id="keyStatus">No key</span>
+      </div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="chips">
+        <button class="chip" data-prompt="I'm feeling FOMO right now">Feeling FOMO</button>
+        <button class="chip" data-prompt="I just took a loss and want revenge trade">Revenge trade</button>
+        <button class="chip" data-prompt="How do I stay patient waiting for setups?">Stay patient</button>
+        <button class="chip" data-prompt="Give me a quick discipline check">Discipline check</button>
+        <button class="chip" data-prompt="I overtraded today. What do I do?">Overtraded</button>
+        <button class="chip" data-prompt="How do I manage my emotions during a losing streak?">Losing streak</button>
+      </div>
+      <div class="row">
+        <input type="text" id="chatInput" placeholder="Ask about discipline, FOMO, patience..." style="flex:1">
+        <button class="btn" id="sendChatBtn" type="button">Send</button>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer>
+  <div>Trade Freedom · Mindset Dashboard · Data stays in your browser</div>
+  <div class="row">
+    <button class="btn ghost" id="exportBtn" type="button">Export</button>
+    <button class="btn ghost" id="importBtn" type="button">Import</button>
+  </div>
+</footer>
+<input type="file" id="importFile" accept=".json" hidden>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+// ── ICONS ──
+const sunSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+const volumeOnSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+const volumeOffSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+const lockSVG='<svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" width="36" height="36"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+const checkBigSVG='<svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="2" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>';
+document.getElementById('voiceToggle').innerHTML=volumeOffSVG;
+const moonSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const eyeOpenSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeClosedSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+const starSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+const copySVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const checkSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+const trashSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+document.getElementById('toggleEyeBtn').innerHTML = eyeClosedSVG;
+document.getElementById('quoteFav').innerHTML = starSVG;
+document.getElementById('quoteCopy').innerHTML = copySVG;
+
+// ── SOUND ENGINE ──
+let audioCtx;
+function getCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function playTone(freq,dur,type='sine',vol=0.05){
+  try{
+    const ctx=getCtx(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.connect(g).connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+dur+0.01);
+  }catch(e){}
+}
+function playSequence(notes){ notes.forEach(([f,d,t,v],i)=>setTimeout(()=>playTone(f,d,t,v),i*120)); }
+const SFX = {
+  click:()=>playTone(1200,0.05,'sine',0.04),
+  add:()=>playSequence([[600,0.08],[900,0.1]]),
+  win:()=>playSequence([[523,0.1],[659,0.1],[784,0.15]]),
+  loss:()=>playSequence([[400,0.12,'sawtooth',0.04],[300,0.18,'sawtooth',0.03]]),
+  check:()=>playTone(1600,0.07,'sine',0.05),
+  timerStart:()=>playSequence([[440,0.08],[660,0.12]]),
+  timerStop:()=>playSequence([[660,0.08],[440,0.08],[330,0.12]]),
+  emotion:()=>playTone(880,0.1,'sine',0.05),
+  noTrade:()=>playSequence([[300,0.1,'square',0.03],[200,0.15,'square',0.03]]),
+  success:()=>playSequence([[523,0.08],[659,0.08],[784,0.08],[1047,0.15]]),
+  nav:()=>playTone(800,0.04,'sine',0.03)
+};
+document.body.addEventListener('click',e=>{ if(e.target.closest('button')) SFX.click(); });
+
+// ── AI VOICE ──
+let voiceEnabled = false;
+let speaking = false;
+const voiceToggle = document.getElementById('voiceToggle');
+voiceToggle.addEventListener('click',()=>{
+  voiceEnabled = !voiceEnabled;
+  voiceToggle.innerHTML = voiceEnabled ? volumeOnSVG : volumeOffSVG;
+  voiceToggle.classList.toggle('active', voiceEnabled);
+  if(!voiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+});
+function speak(text){
+  if(!voiceEnabled || !window.speechSynthesis || speaking) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.92; utt.pitch = 1.1; utt.volume = 0.9;
+  const voices = window.speechSynthesis.getVoices();
+  const female = voices.find(v=>v.name.toLowerCase().includes('female')||v.name.toLowerCase().includes('zira')||v.name.toLowerCase().includes('samantha')||v.name.toLowerCase().includes('karen')||v.name.toLowerCase().includes('moira')||v.name.toLowerCase().includes('google uk english female')||v.name.includes('en-IN')||v.lang==='en-IN')||voices.find(v=>v.lang.startsWith('en'));
+  if(female) utt.voice = female;
+  speaking = true;
+  utt.onend = ()=>{ speaking=false; };
+  utt.onerror = ()=>{ speaking=false; };
+  window.speechSynthesis.speak(utt);
+}
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged = ()=>{};
+
+// ── THEME ──
+const html=document.documentElement;
+const themeToggle=document.getElementById('themeToggle');
+function applyTheme(t){
+  html.setAttribute('data-theme',t);
+  localStorage.setItem('tf_theme',t);
+  themeToggle.innerHTML=t==='dark'?sunSVG:moonSVG;
+  redrawBrain();
+}
+applyTheme(localStorage.getItem('tf_theme')||'dark');
+themeToggle.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+// ── CLOCK ──
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clockTime').textContent=now.toLocaleTimeString('en-GB',{hour12:false});
+  document.getElementById('clockDate').textContent=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
+updateClock(); setInterval(updateClock,1000);
+
+// ── BRAIN CANVAS ANIMATION ──
+const canvas=document.getElementById('brainCanvas');
+const ctx2=canvas.getContext('2d');
+let brainNodes=[], brainAngle=0, rafId;
+const BRAIN_SHAPES=[
+  {x:0.5,y:0.28,r:0.18},{x:0.34,y:0.32,r:0.14},{x:0.66,y:0.32,r:0.14},
+  {x:0.5,y:0.44,r:0.13},{x:0.38,y:0.47,r:0.1},{x:0.62,y:0.47,r:0.1},
+  {x:0.5,y:0.55,r:0.09},{x:0.3,y:0.42,r:0.09},{x:0.7,y:0.42,r:0.09},
+  {x:0.44,y:0.22,r:0.08},{x:0.56,y:0.22,r:0.08},{x:0.5,y:0.16,r:0.07},
+  {x:0.42,y:0.55,r:0.07},{x:0.58,y:0.55,r:0.07},{x:0.5,y:0.62,r:0.06},
+];
+
+function initBrain(){
+  brainNodes=[];
+  BRAIN_SHAPES.forEach(sh=>{
+    const count=Math.floor(6+sh.r*40);
+    for(let i=0;i<count;i++){
+      const ang=Math.random()*Math.PI*2;
+      const dist=Math.random()*sh.r;
+      brainNodes.push({
+        bx:sh.x+Math.cos(ang)*dist*0.85,
+        by:sh.y+Math.sin(ang)*dist*0.85,
+        ox:Math.cos(ang)*dist*0.85, oy:Math.sin(ang)*dist*0.85,
+        px:0,py:0,
+        speed:0.003+Math.random()*0.004,
+        phase:Math.random()*Math.PI*2,
+        size:1+Math.random()*2.5,
+        pulse:Math.random()*Math.PI*2,
+        glow:Math.random()>0.8
+      });
+    }
+  });
+}
+
+function resizeBrain(){
+  const dpr=window.devicePixelRatio||1;
+  const w=canvas.offsetWidth, h=canvas.offsetHeight;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  ctx2.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function redrawBrain(){
+  const isLight=html.getAttribute('data-theme')==='light';
+  const neon=isLight?'0,122,80':'0,255,170';
+  const neon2=isLight?'0,106,158':'0,207,255';
+  return{neon,neon2,isLight};
+}
+
+function animBrain(ts){
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  ctx2.clearRect(0,0,W,H);
+  const {neon,neon2,isLight}=redrawBrain();
+  brainAngle+=0.003;
+
+  // update positions
+  brainNodes.forEach(n=>{
+    const wobble=Math.sin(ts*0.001*n.speed*300+n.phase)*0.018;
+    n.px=n.bx+n.ox*Math.cos(brainAngle*n.speed*30)*0.05+wobble;
+    n.py=n.by+n.oy*Math.sin(brainAngle*n.speed*25)*0.04+Math.cos(ts*0.001*n.speed*200+n.phase)*0.012;
+    n.pulse+=0.04;
+  });
+
+  // connections
+  for(let i=0;i<brainNodes.length;i++){
+    for(let j=i+1;j<brainNodes.length;j++){
+      const a=brainNodes[i],b=brainNodes[j];
+      const dx=(a.px-b.px)*W, dy=(a.py-b.py)*H;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const maxDist=W*0.18;
+      if(dist<maxDist){
+        const alpha=(1-dist/maxDist)*0.35;
+        const useNeon2=(i+j)%3===0;
+        const col=useNeon2?neon2:neon;
+        ctx2.beginPath();
+        ctx2.moveTo(a.px*W,a.py*H);
+        ctx2.lineTo(b.px*W,b.py*H);
+        ctx2.strokeStyle=`rgba(${col},${alpha})`;
+        ctx2.lineWidth=isLight?0.6:0.8;
+        ctx2.stroke();
+      }
+    }
+  }
+
+  // nodes
+  brainNodes.forEach(n=>{
+    const x=n.px*W,y=n.py*H;
+    const gsize=n.glow?(n.size+2+Math.sin(n.pulse)*1.5):n.size;
+    if(n.glow){
+      const grd=ctx2.createRadialGradient(x,y,0,x,y,gsize*4);
+      grd.addColorStop(0,`rgba(${neon},0.6)`);
+      grd.addColorStop(1,`rgba(${neon},0)`);
+      ctx2.beginPath();
+      ctx2.arc(x,y,gsize*4,0,Math.PI*2);
+      ctx2.fillStyle=grd;
+      ctx2.fill();
+    }
+    ctx2.beginPath();
+    ctx2.arc(x,y,gsize*(0.8+Math.sin(n.pulse)*0.2),0,Math.PI*2);
+    ctx2.fillStyle=`rgba(${neon},${n.glow?0.95:0.55})`;
+    ctx2.fill();
+  });
+
+  // subtle center glow only — no egg ring
+
+  rafId=requestAnimationFrame(animBrain);
+}
+
+initBrain();
+resizeBrain();
+requestAnimationFrame(animBrain);
+window.addEventListener('resize',()=>{ resizeBrain(); });
+
+// ── SCROLL LINE EFFECT ──
+window.addEventListener('scroll',()=>{
+  const scrolled=window.scrollY;
+  const grid=document.querySelector('.bg-grid');
+  if(grid) grid.style.backgroundPosition=`0 ${scrolled*0.3}px, ${scrolled*0.15}px 0`;
+},{ passive:true });
+
+// ── JOURNEY ──
+const startDateEl=document.getElementById('startDate');
+function updateJourney(){
+  const val=startDateEl.value; if(!val) return;
+  const start=new Date(val+'T00:00:00'),now=new Date();
+  if(start>now){['years','months','days','totalDays'].forEach(id=>document.getElementById(id).textContent='0');return;}
+  let y=now.getFullYear()-start.getFullYear(),m=now.getMonth()-start.getMonth(),d=now.getDate()-start.getDate();
+  if(d<0){m--;d+=new Date(now.getFullYear(),now.getMonth(),0).getDate();}
+  if(m<0){y--;m+=12;}
+  const total=Math.floor((now-start)/86400000);
+  document.getElementById('years').textContent=y;
+  document.getElementById('months').textContent=m;
+  document.getElementById('days').textContent=d;
+  document.getElementById('totalDays').textContent=total;
+  document.querySelectorAll('.milestone').forEach(b=>b.classList.toggle('active',total>=parseInt(b.dataset.days,10)));
+  localStorage.setItem('tf_startDate',val);
+}
+const savedStart=localStorage.getItem('tf_startDate');
+startDateEl.value=savedStart||new Date().toISOString().slice(0,10);
+updateJourney(); setInterval(updateJourney,60000);
+startDateEl.addEventListener('change',updateJourney);
+document.getElementById('setTodayBtn').addEventListener('click',()=>{startDateEl.value=new Date().toISOString().slice(0,10);updateJourney();});
+
+// ── QUOTES ──
+const BASE_QUOTES=[
+  {text:"The calmer you are, the clearer you think. Move with strategy, not emotions.",author:"You"},
+  {text:"Missing out on temporary fun to build permanent stability is not a loss. Lock in.",author:"You"},
+  {text:"4-5 months are not enough to become a successful trader. Experience is not that cheap.",author:"You"},
+  {text:"Trade less. Trade bigger. The secret of trading success is to do a few things well.",author:"You"},
+  {text:"Trading is not about being right. It's about finding setups with good risk/reward and pulling the trigger.",author:"Mike Bellafiore"},
+  {text:"Trading is just a mirror. Red P&L = Impatience. Blown accounts = No discipline. Fix the person. The trading usually fixes itself.",author:"BDA Trades"},
+  {text:"You don't need to predict the market. Just react with discipline and consistency.",author:"Truth"},
+  {text:"The enemy isn't outside. It's the pattern you refuse to break.",author:"You"},
+  {text:"Your job as a trader is to wait for the best opportunities. Money is made stalking and sitting, not forcing trades.",author:"Dan Zanger"},
+  {text:"Trading gives freedom, but it demands patience and discipline to keep going.",author:"Your Manifesto"}
+];
+let customQuotes=JSON.parse(localStorage.getItem('tf_customQuotes')||'[]');
+let favoriteTexts=JSON.parse(localStorage.getItem('tf_favQuotes')||'[]');
+let currentIdx=parseInt(localStorage.getItem('tf_quoteIdx')||'0',10);
+function getAllQuotes(){return[...BASE_QUOTES,...customQuotes.map(t=>({text:t,author:"You"}))];}
+function saveQState(){localStorage.setItem('tf_customQuotes',JSON.stringify(customQuotes));localStorage.setItem('tf_favQuotes',JSON.stringify(favoriteTexts));localStorage.setItem('tf_quoteIdx',String(currentIdx));}
+function renderQuote(){
+  const all=getAllQuotes();if(currentIdx>=all.length)currentIdx=0;
+  const q=all[currentIdx];
+  document.getElementById('quoteText').textContent=`"${q.text}"`;
+  document.getElementById('quoteAuthor').textContent=`— ${q.author}`;
+  document.getElementById('quoteCounter').textContent=`${currentIdx+1}/${all.length}`;
+  document.getElementById('quoteFav').classList.toggle('active',favoriteTexts.includes(q.text));
+  saveQState();
+}
+document.getElementById('quotePrev').addEventListener('click',()=>{const a=getAllQuotes();currentIdx=(currentIdx-1+a.length)%a.length;renderQuote();SFX.nav();});
+document.getElementById('quoteNext').addEventListener('click',()=>{const a=getAllQuotes();currentIdx=(currentIdx+1)%a.length;renderQuote();SFX.nav();});
+document.getElementById('quoteShuffle').addEventListener('click',()=>{const a=getAllQuotes();currentIdx=Math.floor(Math.random()*a.length);renderQuote();SFX.nav();});
+document.getElementById('quoteFav').addEventListener('click',()=>{const q=getAllQuotes()[currentIdx];const i=favoriteTexts.indexOf(q.text);if(i>=0)favoriteTexts.splice(i,1);else favoriteTexts.push(q.text);renderQuote();});
+document.getElementById('quoteCopy').addEventListener('click',async()=>{const q=getAllQuotes()[currentIdx];try{await navigator.clipboard.writeText(`"${q.text}" — ${q.author}`);document.getElementById('quoteCopy').innerHTML=checkSVG;setTimeout(()=>document.getElementById('quoteCopy').innerHTML=copySVG,900);}catch(e){}});
+let rotateTimer=null;
+document.getElementById('autoRotate').addEventListener('change',e=>{if(e.target.checked)rotateTimer=setInterval(()=>document.getElementById('quoteNext').click(),15000);else clearInterval(rotateTimer);});
+document.getElementById('addQuoteBtn').addEventListener('click',()=>{const v=document.getElementById('customQuoteInput').value.trim();if(v.length<3)return;customQuotes.push(v);document.getElementById('customQuoteInput').value='';currentIdx=getAllQuotes().length-1;renderQuote();SFX.add();});
+renderQuote();
+
+// ── REMINDERS ──
+const reminderTime=document.getElementById('reminderTime');
+const reminderMsg=document.getElementById('reminderMsg');
+const reminderList=document.getElementById('reminderList');
+let reminders=JSON.parse(localStorage.getItem('tf_reminders')||'[]');
+function saveReminders(){localStorage.setItem('tf_reminders',JSON.stringify(reminders));}
+function renderReminders(){
+  reminders.sort((a,b)=>new Date(a.time)-new Date(b.time));
+  reminderList.innerHTML='';
+  if(!reminders.length){reminderList.innerHTML='<li class="empty-state">No reminders set</li>';return;}
+  reminders.forEach(r=>{
+    const li=document.createElement('li');li.className='reminder-item';
+    const dt=new Date(r.time);
+    li.innerHTML=`<div class="reminder-left"><span class="reminder-time">${dt.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span><span class="reminder-msg">${r.message}</span></div><button class="btn icon-btn ghost" data-id="${r.id}" type="button">${trashSVG}</button>`;
+    reminderList.appendChild(li);
+  });
+}
+document.getElementById('addReminderBtn').addEventListener('click',()=>{
+  if(!reminderTime.value||!reminderMsg.value.trim())return;
+  if(Notification&&Notification.permission==='default')Notification.requestPermission();
+  reminders.push({id:Date.now(),time:reminderTime.value,message:reminderMsg.value.trim()});
+  reminderMsg.value='';saveReminders();renderReminders();SFX.add();
+});
+reminderList.addEventListener('click',e=>{const btn=e.target.closest('button[data-id]');if(!btn)return;reminders=reminders.filter(r=>String(r.id)!==btn.dataset.id);saveReminders();renderReminders();});
+function checkReminders(){
+  const now=new Date();let changed=false;
+  reminders=reminders.filter(r=>{const t=new Date(r.time);if(t<=now){if(Notification&&Notification.permission==='granted'){try{new Notification('Trade Freedom',{body:r.message});}catch(e){}}changed=true;return false;}return true;});
+  if(changed){saveReminders();renderReminders();}
+}
+renderReminders();setInterval(checkReminders,15000);
+if(Notification&&Notification.permission==='default')setTimeout(()=>Notification.requestPermission(),1500);
+
+// ── MANIFESTO ──
+const manifestoText=document.getElementById('manifestoText');
+const defaultManifesto="What stopped me from believing 9-5 is the only way? 9-5 felt like slavery. Trading gives freedom, but it demands patience and discipline to keep going.";
+manifestoText.value=localStorage.getItem('tf_manifesto')||defaultManifesto;
+document.getElementById('saveManifestoBtn').addEventListener('click',()=>{localStorage.setItem('tf_manifesto',manifestoText.value);document.getElementById('saveManifestoBtn').textContent='Saved ✓';SFX.success();setTimeout(()=>document.getElementById('saveManifestoBtn').textContent='Save',1200);});
+document.getElementById('resetManifestoBtn').addEventListener('click',()=>{manifestoText.value=defaultManifesto;localStorage.removeItem('tf_manifesto');});
+
+// ── DAILY RULES CHECKLIST ──
+let rules=JSON.parse(localStorage.getItem('tf_rules')||'[]');
+let rulesStreak=parseInt(localStorage.getItem('tf_rules_streak')||'0');
+let lastRulesDate=localStorage.getItem('tf_rules_date')||'';
+const DEFAULT_RULES=['Wait for a clear setup before entering','Check risk-to-reward before every trade','Do not move stop loss against your position','Maximum 3 trades per session','No trading after 2 consecutive losses','Journal every trade before closing the app'];
+
+function initRules(){
+  if(!rules.length){rules=DEFAULT_RULES.map((text,i)=>({id:i+1,text,checked:false}));localStorage.setItem('tf_rules',JSON.stringify(rules));}
+  const today=new Date().toDateString();
+  if(lastRulesDate&&lastRulesDate!==today){
+    const allChecked=rules.every(r=>r.checked);
+    if(allChecked)rulesStreak++;else rulesStreak=0;
+    rules.forEach(r=>r.checked=false);
+    localStorage.setItem('tf_rules_streak',String(rulesStreak));
+    localStorage.setItem('tf_rules',JSON.stringify(rules));
+  }
+  lastRulesDate=today;
+  localStorage.setItem('tf_rules_date',today);
+}
+
+function renderRules(){
+  const list=document.getElementById('rulesList');
+  list.innerHTML='';
+  if(!rules.length){list.innerHTML='<div class="empty-state">Add your trading rules above</div>';updateRulesProgress();return;}
+  rules.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='rule-item'+(r.checked?' checked':'');
+    div.dataset.id=r.id;
+    div.innerHTML=`<div class="rule-check">${checkSVG}</div><span class="rule-text">${r.text}</span><button class="rule-del" data-del="${r.id}" type="button">✕</button>`;
+    div.addEventListener('click',e=>{if(e.target.closest('[data-del]'))return;toggleRule(r.id);});
+    list.appendChild(div);
+  });
+  updateRulesProgress();
+}
+
+function toggleRule(id){
+  const r=rules.find(x=>x.id===id);if(!r)return;
+  r.checked=!r.checked;
+  localStorage.setItem('tf_rules',JSON.stringify(rules));
+  renderRules();
+  if(r.checked){SFX.check();const allDone=rules.every(x=>x.checked);if(allDone){SFX.success();speak("Amazing! All trading rules followed today. You are a disciplined trader.");}}
+}
+
+function updateRulesProgress(){
+  const total=rules.length,done=rules.filter(r=>r.checked).length;
+  const pct=total>0?(done/total*100):0;
+  document.getElementById('rulesProgressFill').style.width=pct+'%';
+  document.getElementById('rulesStatus').textContent=`${done} / ${total} rules followed`;
+  document.getElementById('streakCount').textContent=rulesStreak;
+}
+
+document.getElementById('rulesList').addEventListener('click',e=>{
+  const del=e.target.closest('[data-del]');if(!del)return;
+  rules=rules.filter(r=>String(r.id)!==del.dataset.del);
+  localStorage.setItem('tf_rules',JSON.stringify(rules));renderRules();
+});
+
+document.getElementById('addRuleBtn').addEventListener('click',()=>{
+  const v=document.getElementById('newRuleInput').value.trim();if(!v)return;
+  rules.push({id:Date.now(),text:v,checked:false});
+  document.getElementById('newRuleInput').value='';
+  localStorage.setItem('tf_rules',JSON.stringify(rules));renderRules();SFX.add();
+});
+
+document.getElementById('newRuleInput').addEventListener('keydown',e=>{if(e.key==='Enter'){document.getElementById('addRuleBtn').click();}});
+
+document.getElementById('resetRulesBtn').addEventListener('click',()=>{
+  rules.forEach(r=>r.checked=false);
+  localStorage.setItem('tf_rules',JSON.stringify(rules));renderRules();
+});
+
+initRules();renderRules();
+
+// ── NO TRADE DAY TOGGLE ──
+let noTradeActive=false;
+let noTradeLogs=JSON.parse(localStorage.getItem('tf_notrade_log')||'[]');
+const noTradeToggle=document.getElementById('noTradeToggle');
+const noTradeLabel=document.getElementById('noTradeLabel');
+const noTradeReasonWrap=document.getElementById('noTradeReasonWrap');
+const noTradeLog=document.getElementById('noTradeLog');
+
+function renderNoTradeLog(){
+  noTradeLog.innerHTML='';
+  if(!noTradeLogs.length){noTradeLog.innerHTML='<div class="empty-state">No entries yet</div>';return;}
+  [...noTradeLogs].reverse().slice(0,6).forEach(e=>{
+    const div=document.createElement('div');
+    div.className=`no-trade-item ${e.type}-entry`;
+    const dt=new Date(e.ts).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+    div.innerHTML=`<div class="nt-date">${dt} · ${e.type==='notrade'?'<svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" width="12" height="12"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> No-Trade Day':'<svg viewBox="0 0 24 24" fill="none" stroke="var(--neon)" stroke-width="2" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg> Trading Day'}</div><div class="nt-reason">${e.reason||'—'}</div>`;
+    noTradeLog.appendChild(div);
+  });
+}
+
+noTradeToggle.addEventListener('click',()=>{
+  noTradeActive=!noTradeActive;
+  if(noTradeActive){
+    noTradeToggle.innerHTML=lockSVG;
+    noTradeToggle.className='no-trade-toggle active';
+    noTradeLabel.textContent='No-Trade Day';
+    noTradeLabel.className='no-trade-label notrade';
+    noTradeReasonWrap.className='no-trade-reason-wrap show';
+    SFX.noTrade();
+  } else {
+    noTradeToggle.innerHTML=checkBigSVG;
+    noTradeToggle.className='no-trade-toggle off-mode';
+    noTradeLabel.textContent='Trading Today';
+    noTradeLabel.className='no-trade-label trading';
+    noTradeReasonWrap.className='no-trade-reason-wrap';
+    noTradeLogs.push({type:'trade',reason:'Returned to trading',ts:Date.now()});
+    localStorage.setItem('tf_notrade_log',JSON.stringify(noTradeLogs));
+    renderNoTradeLog(); SFX.success();
+  }
+});
+
+document.getElementById('confirmNoTrade').addEventListener('click',()=>{
+  const reason=document.getElementById('noTradeReason').value.trim();
+  noTradeLogs.push({type:'notrade',reason:reason||'No reason given',ts:Date.now()});
+  localStorage.setItem('tf_notrade_log',JSON.stringify(noTradeLogs));
+  document.getElementById('noTradeReason').value='';
+  renderNoTradeLog();
+  speak("No-Trade Day locked in. Protecting your capital is a trade too. Stay disciplined.");
+  SFX.success();
+});
+
+renderNoTradeLog();
+
+// ── EMOTIONAL STATE ──
+const EMOTION_LABELS={1:'Chaos — Do NOT trade',2:'Off — Trade small or skip',3:'Neutral — Proceed carefully',4:'Good — Normal sizing',5:'Locked in — Full focus'};
+const EMOTION_EMOJIS={
+  1:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+  2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+  3:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="8" y1="13" x2="16" y2="13"/><circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/></svg>',
+  4:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+  5:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><path d="M9 8.5c.5-.5 1.5-.5 2 0"/><path d="M13 8.5c.5-.5 1.5-.5 2 0"/></svg>'
+};
+let selectedEmotion=null;
+let emotionHistory=JSON.parse(localStorage.getItem('tf_emotions')||'[]');
+
+function renderEmotionLog(){
+  const log=document.getElementById('emotionLog');log.innerHTML='';
+  if(!emotionHistory.length){log.innerHTML='<div class="empty-state">No entries yet</div>';return;}
+  [...emotionHistory].reverse().slice(0,10).forEach(e=>{
+    const div=document.createElement('div');div.className='emotion-item';
+    const ts=new Date(e.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    div.innerHTML=`<span class="emotion-pill ep-${e.v}">${EMOTION_EMOJIS[e.v]} ${e.v}</span><span class="emotion-note">${e.note||'—'}</span><span class="emotion-ts">${ts}</span>`;
+    log.appendChild(div);
+  });
+}
+
+document.querySelectorAll('.emotion-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const v=parseInt(btn.dataset.v);selectedEmotion=v;
+    document.querySelectorAll('.emotion-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const lbl=document.getElementById('emotionLabel');
+    lbl.textContent=EMOTION_LABELS[v];
+    lbl.style.color=v<=2?'var(--red)':v===3?'var(--gold)':'var(--neon)';
+    SFX.emotion();
+  });
+});
+
+document.getElementById('logEmotionBtn').addEventListener('click',()=>{
+  if(!selectedEmotion)return;
+  const note=document.getElementById('emotionNote').value.trim();
+  emotionHistory.push({v:selectedEmotion,note,ts:Date.now()});
+  localStorage.setItem('tf_emotions',JSON.stringify(emotionHistory));
+  document.getElementById('emotionNote').value='';
+  renderEmotionLog();
+  if(selectedEmotion<=2) speak("Warning. Your emotional state is low. Consider skipping trading today. Protect your capital.");
+  else if(selectedEmotion===5) speak("You are locked in. Execute your rules with precision. Let your edge do the work.");
+  SFX.success();
+});
+renderEmotionLog();
+
+// ── SESSION TIMER ──
+const timerDisplay=document.getElementById('timerDisplay');
+const timerStart=document.getElementById('timerStart');
+const timerPause=document.getElementById('timerPause');
+const timerStop=document.getElementById('timerStop');
+const sessionNote=document.getElementById('sessionNote');
+const sessionLog=document.getElementById('sessionLog');
+let timerInterval=null,timerSeconds=0,timerRunning=false,sessionStart=null;
+let sessions=JSON.parse(localStorage.getItem('tf_sessions')||'[]');
+function formatTime(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return[h,m,sec].map(v=>String(v).padStart(2,'0')).join(':');}
+function renderSessionLog(){
+  sessionLog.innerHTML='';
+  if(!sessions.length){sessionLog.innerHTML='<div class="empty-state">No sessions logged</div>';return;}
+  [...sessions].reverse().slice(0,6).forEach(s=>{
+    const div=document.createElement('div');div.className='session-item';
+    const dt=new Date(s.start).toLocaleDateString([],{month:'short',day:'numeric'});
+    div.innerHTML=`<span class="session-dur">${formatTime(s.duration)}</span><span class="session-note">${s.note||'No note'}</span><span class="session-date">${dt}</span>`;
+    sessionLog.appendChild(div);
+  });
+}
+timerStart.addEventListener('click',()=>{
+  if(timerRunning)return;
+  timerRunning=true;if(!sessionStart)sessionStart=Date.now();
+  timerInterval=setInterval(()=>{timerSeconds++;timerDisplay.textContent=formatTime(timerSeconds);},1000);
+  timerDisplay.className='timer-display running';
+  timerStart.disabled=true;timerPause.disabled=false;timerStop.disabled=false;
+  SFX.timerStart(); speak("Session started. Stay focused and follow your rules.");
+});
+timerPause.addEventListener('click',()=>{
+  if(!timerRunning)return;
+  timerRunning=false;clearInterval(timerInterval);
+  timerDisplay.className='timer-display paused';
+  timerStart.disabled=false;timerPause.disabled=true;
+});
+timerStop.addEventListener('click',()=>{
+  if(timerSeconds===0)return;
+  clearInterval(timerInterval);timerRunning=false;
+  sessions.push({duration:timerSeconds,note:sessionNote.value.trim(),start:sessionStart||Date.now()});
+  localStorage.setItem('tf_sessions',JSON.stringify(sessions));
+  timerSeconds=0;sessionStart=null;
+  timerDisplay.textContent='00:00:00';timerDisplay.className='timer-display';
+  sessionNote.value='';
+  timerStart.disabled=false;timerPause.disabled=true;timerStop.disabled=true;
+  renderSessionLog(); SFX.timerStop();
+  speak("Session complete. Take a break, journal your trades, and reflect on your rules.");
+});
+renderSessionLog();
+
+// ── WIN RATE ──
+let trades=JSON.parse(localStorage.getItem('tf_trades')||'[]');
+function calcWR(){
+  const wins=trades.filter(t=>t.o==='win').length;
+  const losses=trades.filter(t=>t.o==='loss').length;
+  const bes=trades.filter(t=>t.o==='be').length;
+  const total=wins+losses+bes;
+  const wr=total>0?((wins/total)*100).toFixed(1):0;
+  const winRRs=trades.filter(t=>t.o==='win'&&t.rr).map(t=>t.rr);
+  const lossRRs=trades.filter(t=>t.o==='loss'&&t.rr).map(t=>t.rr);
+  const avgWinRR=winRRs.length>0?(winRRs.reduce((a,b)=>a+b,0)/winRRs.length):0;
+  const avgLossRR=lossRRs.length>0?(lossRRs.reduce((a,b)=>a+b,0)/lossRRs.length):1;
+  const wrDec=wins/Math.max(total,1);
+  const expectancy=((wrDec*avgWinRR)-((1-wrDec)*avgLossRR)).toFixed(2);
+  document.getElementById('wrRate').textContent=`${wr}%`;
+  document.getElementById('wrAvgRR').textContent=avgWinRR.toFixed(1)+'R';
+  document.getElementById('wrExpect').textContent=expectancy+'R';
+  document.getElementById('wrWins').textContent=`${wins}W`;
+  document.getElementById('wrLosses').textContent=`${losses}L`;
+  document.getElementById('wrBE').textContent=`${bes}BE`;
+  document.getElementById('wrBarFill').style.width=`${wr}%`;
+}
+function renderWRHistory(){
+  const hist=document.getElementById('wrHistory');hist.innerHTML='';
+  if(!trades.length){hist.innerHTML='<div class="empty-state">No trades logged</div>';return;}
+  [...trades].reverse().slice(0,10).forEach(t=>{
+    const div=document.createElement('div');div.className='wr-entry';
+    const tagClass=t.o==='win'?'win':t.o==='loss'?'loss':'be';
+    const label=t.o==='win'?'WIN':t.o==='loss'?'LOSS':'BE';
+    div.innerHTML=`<span class="wr-tag ${tagClass}">${label}</span><span style="color:var(--muted);flex:1;text-align:right">${t.rr?t.rr+'R':'—'}</span><span style="color:var(--dim);margin-left:8px">${new Date(t.ts).toLocaleDateString([],{month:'short',day:'numeric'})}</span>`;
+    hist.appendChild(div);
+  });
+}
+document.getElementById('addTradeBtn').addEventListener('click',()=>{
+  const o=document.getElementById('tradeOutcome').value;
+  const rr=parseFloat(document.getElementById('tradeRR').value)||null;
+  trades.push({o,rr,ts:Date.now()});
+  localStorage.setItem('tf_trades',JSON.stringify(trades));
+  document.getElementById('tradeRR').value='';
+  calcWR();renderWRHistory();
+  if(o==='win') SFX.win();
+  else if(o==='loss'){ SFX.loss(); speak("Loss logged. That is data, not failure. Review your rules and move forward."); }
+  else SFX.add();
+});
+calcWR();renderWRHistory();
+
+// ── AI COACH ──
+const apiKeyInput=document.getElementById('apiKeyInput');
+const toggleEyeBtn=document.getElementById('toggleEyeBtn');
+const keyStatus=document.getElementById('keyStatus');
+const chatBox=document.getElementById('chatBox');
+const chatInput=document.getElementById('chatInput');
+
+function updateKeyStatus(){
+  const k=localStorage.getItem('tf_geminiKey');
+  if(k){keyStatus.textContent='Key active ✓';keyStatus.classList.add('active');apiKeyInput.value=k;}
+  else{keyStatus.textContent='No key';keyStatus.classList.remove('active');apiKeyInput.value='';}
+}
+updateKeyStatus();
+
+// EYE TOGGLE — clearly visible
+toggleEyeBtn.innerHTML=eyeClosedSVG;
+toggleEyeBtn.addEventListener('click',()=>{
+  const isPass=apiKeyInput.type==='password';
+  apiKeyInput.type=isPass?'text':'password';
+  toggleEyeBtn.innerHTML=isPass?eyeOpenSVG:eyeClosedSVG;
+});
+
+document.getElementById('saveKeyBtn').addEventListener('click',()=>{
+  const v=apiKeyInput.value.trim();if(!v)return;
+  localStorage.setItem('tf_geminiKey',v);updateKeyStatus();
+  document.getElementById('saveKeyBtn').textContent='Saved ✓';
+  setTimeout(()=>document.getElementById('saveKeyBtn').textContent='Save Key',900);
+  SFX.success();
+});
+document.getElementById('forgetKeyBtn').addEventListener('click',()=>{localStorage.removeItem('tf_geminiKey');updateKeyStatus();});
+
+function addMsg(role,text){
+  const div=document.createElement('div');div.className='msg '+role;
+  div.innerHTML=`<div class="bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  chatBox.appendChild(div);chatBox.scrollTop=chatBox.scrollHeight;
+  if(role==='assistant') speak(text);
+}
+function demoReply(p){
+  p=p.toLowerCase();
+  if(p.includes('fomo')) return "FOMO is a tax on impatience. Wait for your edge. No setup — no trade. The market will always give another opportunity.";
+  if(p.includes('revenge')||p.includes('loss')) return "One loss does not define you. Step away, breathe, journal it. Revenge trading fixes nothing — it compounds the mistake.";
+  if(p.includes('patient')||p.includes('wait')) return "Patience is your edge. Your job is to stalk setups, not chase them. Sit on hands until an A+ appears.";
+  if(p.includes('discipline')) return "Discipline is choosing your plan over your feelings. Risk small, execute clean, review honestly every day.";
+  if(p.includes('overtrad')) return "Close the platform now. Your edge disappears with frequency. More trades never means more money. Less is always more.";
+  if(p.includes('losing streak')||p.includes('streak')) return "Losing streaks reveal your true character as a trader. Cut size in half, follow rules strictly, let the storm pass. Your edge is still there.";
+  const reps=["Trade less, trade bigger. Quality over quantity always.","Calm mind, clear charts. Emotions are just noise.","You don't need to be right. You need to manage risk.","Fix the person — the P&L fixes itself.","Consistency beats intensity. Show up, wait, execute."];
+  return reps[Math.floor(Math.random()*reps.length)];
+}
+async function callGemini(prompt,key){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${encodeURIComponent(key)}`;
+  const body={contents:[{role:"user",parts:[{text:`You are a trading mindset coach. Be concise, direct, no fluff, max 3 sentences. Focus on discipline, patience, risk management. User: ${prompt}`}]}],generationConfig:{temperature:0.7,maxOutputTokens:200}};
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!res.ok)throw new Error('API error '+res.status);
+  const data=await res.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||"No response.";
+}
+async function sendMessage(){
+  const text=chatInput.value.trim();if(!text)return;
+  addMsg('user',text);chatInput.value='';
+  const key=localStorage.getItem('tf_geminiKey');
+  if(!key){setTimeout(()=>addMsg('assistant',demoReply(text)),300);return;}
+  addMsg('assistant','Thinking...');
+  const thinking=chatBox.lastElementChild;
+  try{const reply=await callGemini(text,key);thinking.querySelector('.bubble').textContent=reply;speak(reply);}
+  catch(e){thinking.querySelector('.bubble').textContent='Error: '+e.message+' — Using demo mode.';setTimeout(()=>addMsg('assistant',demoReply(text)),400);}
+}
+document.getElementById('sendChatBtn').addEventListener('click',sendMessage);
+chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage();}});
+document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{chatInput.value=ch.dataset.prompt;sendMessage();}));
+addMsg('assistant',"Ready. Ask about discipline, FOMO, patience, or losing streaks. Patience > Predictions. 🔥");
+
+// ── EXPORT / IMPORT ──
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const data={
+    version:3,exportedAt:new Date().toISOString(),
+    theme:html.getAttribute('data-theme'),
+    startDate:localStorage.getItem('tf_startDate'),
+    customQuotes:JSON.parse(localStorage.getItem('tf_customQuotes')||'[]'),
+    favoriteTexts:JSON.parse(localStorage.getItem('tf_favQuotes')||'[]'),
+    quoteIdx:parseInt(localStorage.getItem('tf_quoteIdx')||'0',10),
+    reminders:JSON.parse(localStorage.getItem('tf_reminders')||'[]'),
+    manifesto:localStorage.getItem('tf_manifesto'),
+    geminiKey:localStorage.getItem('tf_geminiKey'),
+    emotions:JSON.parse(localStorage.getItem('tf_emotions')||'[]'),
+    sessions:JSON.parse(localStorage.getItem('tf_sessions')||'[]'),
+    trades:JSON.parse(localStorage.getItem('tf_trades')||'[]'),
+    rules:JSON.parse(localStorage.getItem('tf_rules')||'[]'),
+    rulesStreak:localStorage.getItem('tf_rules_streak'),
+    noTradeLogs:JSON.parse(localStorage.getItem('tf_notrade_log')||'[]')
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`trade-freedom-v3-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);
+  SFX.success();
+});
+document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change',async e=>{
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const text=await file.text(),data=JSON.parse(text);
+    if(data.theme)localStorage.setItem('tf_theme',data.theme);
+    if(data.startDate)localStorage.setItem('tf_startDate',data.startDate);
+    if(data.customQuotes)localStorage.setItem('tf_customQuotes',JSON.stringify(data.customQuotes));
+    if(data.favoriteTexts)localStorage.setItem('tf_favQuotes',JSON.stringify(data.favoriteTexts));
+    if(data.quoteIdx!=null)localStorage.setItem('tf_quoteIdx',String(data.quoteIdx));
+    if(data.reminders)localStorage.setItem('tf_reminders',JSON.stringify(data.reminders));
+    if(data.manifesto)localStorage.setItem('tf_manifesto',data.manifesto);
+    if(data.geminiKey)localStorage.setItem('tf_geminiKey',data.geminiKey);
+    if(data.emotions)localStorage.setItem('tf_emotions',JSON.stringify(data.emotions));
+    if(data.sessions)localStorage.setItem('tf_sessions',JSON.stringify(data.sessions));
+    if(data.trades)localStorage.setItem('tf_trades',JSON.stringify(data.trades));
+    if(data.rules)localStorage.setItem('tf_rules',JSON.stringify(data.rules));
+    if(data.rulesStreak)localStorage.setItem('tf_rules_streak',data.rulesStreak);
+    if(data.noTradeLogs)localStorage.setItem('tf_notrade_log',JSON.stringify(data.noTradeLogs));
+    location.reload();
+  }catch(err){alert('Import failed: '+err.message);}
+});
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
