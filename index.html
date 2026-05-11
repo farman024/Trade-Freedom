@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trade Freedom — Trader Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2303080a'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='900' font-size='18' fill='%2300ffaa'%3ETF%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -42,11 +43,11 @@ body{font-family:'Syne',system-ui,sans-serif;background:var(--bg);color:var(--te
 
 /* HERO */
 .hero{position:relative;padding:60px 24px 28px;text-align:center;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:0}
-.brain-wrap{width:100%;max-width:340px;height:220px;position:relative;flex-shrink:0;margin-bottom:24px}
+.brain-wrap{width:100%;max-width:440px;height:300px;position:relative;flex-shrink:0;margin-bottom:20px}
 #brainCanvas{width:100%;height:100%;display:block}
 .hero-content{position:relative;z-index:1;width:100%}
 @media(max-width:640px){
-  .brain-wrap{height:180px;max-width:260px;margin-bottom:20px}
+  .brain-wrap{height:240px;max-width:340px;margin-bottom:16px}
 }
 .header-eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.25em;color:var(--neon);text-transform:uppercase;margin-bottom:12px;opacity:0.85}
 h1{font-size:clamp(36px,6vw,66px);font-weight:800;letter-spacing:-0.03em;line-height:1;
@@ -230,9 +231,11 @@ textarea{resize:vertical;min-height:80px}
 .rule-item.checked .rule-check svg{opacity:1}
 .rule-text{font-size:14px;flex:1;transition:color .2s}
 .rule-item.checked .rule-text{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(var(--neon-rgb),0.4)}
-.rule-del{opacity:0;font-size:16px;color:var(--dim);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:6px;transition:opacity .2s,color .2s;font-family:inherit}
-.rule-item:hover .rule-del{opacity:1}
+.rule-del{opacity:0;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;transition:opacity .2s,color .2s;font-family:inherit;display:grid;place-items:center}
+.rule-edit{opacity:0;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;transition:opacity .2s,color .2s;font-family:inherit;display:grid;place-items:center}
+.rule-item:hover .rule-del,.rule-item:hover .rule-edit{opacity:1}
 .rule-del:hover{color:var(--red)}
+.rule-edit:hover{color:var(--neon)}
 .add-rule-row{display:flex;gap:8px;margin-top:12px}
 .rules-progress{height:6px;background:rgba(var(--neon-rgb),0.1);border-radius:999px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border)}
 .rules-progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--neon),var(--neon2));transition:width .5s cubic-bezier(.16,1,.3,1)}
@@ -513,26 +516,33 @@ footer{max-width:1240px;margin:0 auto 32px;padding:20px 18px 0;display:flex;just
     <section class="card col-12">
       <h2><span class="dot"></span> AI Mindset Coach <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px">— Gemini powered</span></h2>
       <div class="row" style="align-items:stretch;gap:8px;flex-wrap:wrap">
-        <div style="flex:0 0 auto">
-          <select id="geminiModel" style="height:100%">
-            <option value="gemini-flash-latest">gemini-flash-latest</option>
-            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
-            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-            <option value="gemini-2.5-pro-preview-05-06">gemini-2.5-pro-preview</option>
-          </select>
-        </div>
-        <div class="pw-wrap" style="flex:1;min-width:160px">
+        <select id="geminiModel" style="flex:0 0 auto;min-width:160px">
+          <option value="gemini-flash-latest">gemini-flash-latest</option>
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+          <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+          <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+          <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+          <option value="gemini-2.5-pro-preview-05-06">gemini-2.5-pro-preview</option>
+        </select>
+        <div class="pw-wrap" style="flex:1;min-width:180px">
           <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API Key...">
           <button class="pw-eye" id="toggleEyeBtn" type="button" aria-label="Show/hide key"></button>
         </div>
-        <button class="btn" id="saveKeyBtn" type="button">Save Key</button>
-        <button class="btn ghost" id="forgetKeyBtn" type="button">Forget</button>
-        <span class="key-status" id="keyStatus">No key</span>
+        <div class="row" style="gap:8px;flex-wrap:nowrap">
+          <button class="btn" id="saveKeyBtn" type="button">Save Key</button>
+          <button class="btn ghost" id="forgetKeyBtn" type="button">Forget</button>
+          <span class="key-status" id="keyStatus">No key</span>
+        </div>
       </div>
       <div class="chat-box" id="chatBox"></div>
+      <div class="row" style="justify-content:space-between;margin-bottom:6px">
+        <div class="chips" style="margin:0;flex:1"></div>
+        <button class="btn ghost" id="clearChatBtn" type="button" style="font-size:11px;padding:5px 10px;flex-shrink:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Clear
+        </button>
+      </div>
       <div class="chips">
         <button class="chip" data-prompt="I'm feeling FOMO right now">Feeling FOMO</button>
         <button class="chip" data-prompt="I just took a loss and want revenge trade">Revenge trade</button>
@@ -551,7 +561,11 @@ footer{max-width:1240px;margin:0 auto 32px;padding:20px 18px 0;display:flex;just
 </main>
 
 <footer>
-  <div>Trade Freedom · Mindset Dashboard · Data stays in your browser</div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <div style="font-weight:700;color:var(--text);font-size:13px">Trade Freedom</div>
+    <div style="font-size:11px">Mindset Dashboard · Data stays in your browser</div>
+  </div>
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--neon);letter-spacing:0.06em">Farman J · AI Generalist</div>
   <div class="row">
     <button class="btn ghost" id="exportBtn" type="button">Export</button>
     <button class="btn ghost" id="importBtn" type="button">Import</button>
@@ -641,7 +655,6 @@ function applyTheme(t){
   html.setAttribute('data-theme',t);
   localStorage.setItem('tf_theme',t);
   themeToggle.innerHTML=t==='dark'?sunSVG:moonSVG;
-  redrawBrain();
 }
 applyTheme(localStorage.getItem('tf_theme')||'dark');
 themeToggle.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
@@ -656,107 +669,166 @@ updateClock(); setInterval(updateClock,1000);
 
 // ── BRAIN CANVAS ANIMATION ──
 const canvas=document.getElementById('brainCanvas');
-const ctx2=canvas.getContext('2d');
-let brainNodes=[], brainAngle=0, rafId;
-const BRAIN_SHAPES=[
-  {x:0.5,y:0.28,r:0.18},{x:0.34,y:0.32,r:0.14},{x:0.66,y:0.32,r:0.14},
-  {x:0.5,y:0.44,r:0.13},{x:0.38,y:0.47,r:0.1},{x:0.62,y:0.47,r:0.1},
-  {x:0.5,y:0.55,r:0.09},{x:0.3,y:0.42,r:0.09},{x:0.7,y:0.42,r:0.09},
-  {x:0.44,y:0.22,r:0.08},{x:0.56,y:0.22,r:0.08},{x:0.5,y:0.16,r:0.07},
-  {x:0.42,y:0.55,r:0.07},{x:0.58,y:0.55,r:0.07},{x:0.5,y:0.62,r:0.06},
-];
+const ctx2=canvas.getContext('2d',{alpha:true});
+let DPR=1, brainAngle=0, rafId;
+let nodes3D=[], rings=[];
 
 function initBrain(){
-  brainNodes=[];
-  BRAIN_SHAPES.forEach(sh=>{
-    const count=Math.floor(6+sh.r*40);
-    for(let i=0;i<count;i++){
-      const ang=Math.random()*Math.PI*2;
-      const dist=Math.random()*sh.r;
-      brainNodes.push({
-        bx:sh.x+Math.cos(ang)*dist*0.85,
-        by:sh.y+Math.sin(ang)*dist*0.85,
-        ox:Math.cos(ang)*dist*0.85, oy:Math.sin(ang)*dist*0.85,
-        px:0,py:0,
-        speed:0.003+Math.random()*0.004,
-        phase:Math.random()*Math.PI*2,
-        size:1+Math.random()*2.5,
-        pulse:Math.random()*Math.PI*2,
-        glow:Math.random()>0.8
-      });
-    }
-  });
+  nodes3D=[];
+  rings=[];
+  // Surface nodes distributed on a sphere using fibonacci lattice
+  const total=120;
+  const phi=Math.PI*(3-Math.sqrt(5));
+  for(let i=0;i<total;i++){
+    const y=1-(i/(total-1))*2;
+    const r=Math.sqrt(1-y*y);
+    const theta=phi*i;
+    nodes3D.push({
+      ox:Math.cos(theta)*r,
+      oy:y,
+      oz:Math.sin(theta)*r,
+      size:0.8+Math.random()*2.2,
+      glow:Math.random()>0.72,
+      pulse:Math.random()*Math.PI*2,
+      pSpeed:0.02+Math.random()*0.03
+    });
+  }
+  // Orbital rings — 4 rings at different tilts
+  rings=[
+    {tiltX:0,    tiltZ:0,    speed:0.008, segments:80},
+    {tiltX:0.9,  tiltZ:0.3,  speed:-0.006,segments:70},
+    {tiltX:0.4,  tiltZ:1.1,  speed:0.005, segments:60},
+    {tiltX:1.3,  tiltZ:0.6,  speed:-0.007,segments:50},
+  ];
 }
 
 function resizeBrain(){
-  const dpr=window.devicePixelRatio||1;
-  const w=canvas.offsetWidth, h=canvas.offsetHeight;
-  canvas.width=w*dpr; canvas.height=h*dpr;
-  ctx2.setTransform(dpr,0,0,dpr,0,0);
+  DPR=Math.min(window.devicePixelRatio||1,3);
+  const w=canvas.offsetWidth,h=canvas.offsetHeight;
+  canvas.width=Math.round(w*DPR);
+  canvas.height=Math.round(h*DPR);
+  ctx2.resetTransform();
+  ctx2.scale(DPR,DPR);
 }
 
-function redrawBrain(){
-  const isLight=html.getAttribute('data-theme')==='light';
-  const neon=isLight?'0,122,80':'0,255,170';
-  const neon2=isLight?'0,106,158':'0,207,255';
-  return{neon,neon2,isLight};
+function project(x,y,z,cx,cy,radius){
+  // Simple perspective projection after Y-axis rotation
+  const cosA=Math.cos(brainAngle), sinA=Math.sin(brainAngle);
+  const rx=x*cosA+z*sinA;
+  const ry=y;
+  const rz=-x*sinA+z*cosA;
+  const fov=2.8;
+  const scale=fov/(fov+rz+1);
+  return{
+    sx:cx+rx*radius*scale,
+    sy:cy+ry*radius*scale,
+    scale,
+    depth:rz
+  };
 }
 
 function animBrain(ts){
-  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
   ctx2.clearRect(0,0,W,H);
-  const {neon,neon2,isLight}=redrawBrain();
-  brainAngle+=0.003;
+  const isLight=html.getAttribute('data-theme')==='light';
+  const neon=isLight?'0,122,80':'0,255,170';
+  const neon2=isLight?'0,106,158':'0,207,255';
+  const cx=W*0.5, cy=H*0.5;
+  const radius=Math.min(W,H)*0.38;
+  brainAngle+=0.006;
 
-  // update positions
-  brainNodes.forEach(n=>{
-    const wobble=Math.sin(ts*0.001*n.speed*300+n.phase)*0.018;
-    n.px=n.bx+n.ox*Math.cos(brainAngle*n.speed*30)*0.05+wobble;
-    n.py=n.by+n.oy*Math.sin(brainAngle*n.speed*25)*0.04+Math.cos(ts*0.001*n.speed*200+n.phase)*0.012;
-    n.pulse+=0.04;
+  // Core glow at centre
+  const coreGrd=ctx2.createRadialGradient(cx,cy,0,cx,cy,radius*0.3);
+  coreGrd.addColorStop(0,`rgba(${neon},0.18)`);
+  coreGrd.addColorStop(0.5,`rgba(${neon},0.06)`);
+  coreGrd.addColorStop(1,`rgba(${neon},0)`);
+  ctx2.beginPath();
+  ctx2.arc(cx,cy,radius*0.3,0,Math.PI*2);
+  ctx2.fillStyle=coreGrd;
+  ctx2.fill();
+
+  // Orbital rings
+  rings.forEach((ring,ri)=>{
+    const ang=brainAngle*ring.speed/0.006;
+    const pts=ring.segments;
+    ctx2.beginPath();
+    let first=true;
+    for(let i=0;i<=pts;i++){
+      const t=(i/pts)*Math.PI*2;
+      // Ring in XZ plane, then tilt
+      const rx0=Math.cos(t);
+      const ry0=Math.sin(t)*Math.sin(ring.tiltX);
+      const rz0=Math.sin(t)*Math.cos(ring.tiltX);
+      // Second tilt around Y
+      const rx1=rx0*Math.cos(ring.tiltZ)-rz0*Math.sin(ring.tiltZ);
+      const rz1=rx0*Math.sin(ring.tiltZ)+rz0*Math.cos(ring.tiltZ);
+      const p=project(rx1,ry0,rz1,cx,cy,radius*(0.88+ri*0.06));
+      if(first){ctx2.moveTo(p.sx,p.sy);first=false;}
+      else ctx2.lineTo(p.sx,p.sy);
+    }
+    const alpha=0.18+ri*0.04;
+    ctx2.strokeStyle=`rgba(${ri%2===0?neon:neon2},${alpha})`;
+    ctx2.lineWidth=0.8;
+    ctx2.stroke();
   });
 
-  // connections
-  for(let i=0;i<brainNodes.length;i++){
-    for(let j=i+1;j<brainNodes.length;j++){
-      const a=brainNodes[i],b=brainNodes[j];
-      const dx=(a.px-b.px)*W, dy=(a.py-b.py)*H;
+  // Project and sort nodes by depth
+  const projected=nodes3D.map(n=>{
+    n.pulse+=n.pSpeed;
+    const p=project(n.ox,n.oy,n.oz,cx,cy,radius);
+    return{...n,...p};
+  }).sort((a,b)=>a.depth-b.depth);
+
+  // Connections between close surface nodes
+  for(let i=0;i<projected.length;i++){
+    for(let j=i+1;j<projected.length;j++){
+      const a=projected[i],b=projected[j];
+      if(a.depth<-0.5||b.depth<-0.5) continue; // skip back hemisphere
+      const dx=a.sx-b.sx,dy=a.sy-b.sy;
       const dist=Math.sqrt(dx*dx+dy*dy);
-      const maxDist=W*0.18;
-      if(dist<maxDist){
-        const alpha=(1-dist/maxDist)*0.35;
-        const useNeon2=(i+j)%3===0;
-        const col=useNeon2?neon2:neon;
+      const maxD=radius*0.32;
+      if(dist<maxD){
+        const alpha=(1-dist/maxD)*0.28*Math.max(a.scale,b.scale);
         ctx2.beginPath();
-        ctx2.moveTo(a.px*W,a.py*H);
-        ctx2.lineTo(b.px*W,b.py*H);
-        ctx2.strokeStyle=`rgba(${col},${alpha})`;
-        ctx2.lineWidth=isLight?0.6:0.8;
+        ctx2.moveTo(a.sx,a.sy);
+        ctx2.lineTo(b.sx,b.sy);
+        ctx2.strokeStyle=`rgba(${neon},${alpha})`;
+        ctx2.lineWidth=0.6;
         ctx2.stroke();
       }
     }
   }
 
-  // nodes
-  brainNodes.forEach(n=>{
-    const x=n.px*W,y=n.py*H;
-    const gsize=n.glow?(n.size+2+Math.sin(n.pulse)*1.5):n.size;
-    if(n.glow){
-      const grd=ctx2.createRadialGradient(x,y,0,x,y,gsize*4);
-      grd.addColorStop(0,`rgba(${neon},0.6)`);
-      grd.addColorStop(1,`rgba(${neon},0)`);
-      ctx2.beginPath();
-      ctx2.arc(x,y,gsize*4,0,Math.PI*2);
-      ctx2.fillStyle=grd;
-      ctx2.fill();
-    }
-    ctx2.beginPath();
-    ctx2.arc(x,y,gsize*(0.8+Math.sin(n.pulse)*0.2),0,Math.PI*2);
-    ctx2.fillStyle=`rgba(${neon},${n.glow?0.95:0.55})`;
-    ctx2.fill();
-  });
+  // Draw nodes
+  projected.forEach(n=>{
+    if(n.depth<-0.65) return; // hide back nodes
+    const brightness=Math.max(0,(n.depth+1)/2);
+    const ps=Math.sin(n.pulse);
+    const gs=n.size*n.scale*(0.9+ps*0.12);
+    const alpha=0.4+brightness*0.6;
 
-  // subtle center glow only — no egg ring
+    if(n.glow){
+      const g=ctx2.createRadialGradient(n.sx,n.sy,0,n.sx,n.sy,gs*5);
+      g.addColorStop(0,`rgba(${neon},${alpha*0.7})`);
+      g.addColorStop(0.4,`rgba(${neon},${alpha*0.15})`);
+      g.addColorStop(1,`rgba(${neon},0)`);
+      ctx2.beginPath();
+      ctx2.arc(n.sx,n.sy,gs*5,0,Math.PI*2);
+      ctx2.fillStyle=g; ctx2.fill();
+      // bright core
+      ctx2.beginPath();
+      ctx2.arc(n.sx,n.sy,gs,0,Math.PI*2);
+      ctx2.fillStyle=`rgba(${neon},${alpha})`; ctx2.fill();
+      // white hot centre
+      ctx2.beginPath();
+      ctx2.arc(n.sx,n.sy,gs*0.4,0,Math.PI*2);
+      ctx2.fillStyle=`rgba(255,255,255,${brightness*0.9})`; ctx2.fill();
+    } else {
+      ctx2.beginPath();
+      ctx2.arc(n.sx,n.sy,gs*0.85,0,Math.PI*2);
+      ctx2.fillStyle=`rgba(${neon},${alpha*0.7})`; ctx2.fill();
+    }
+  });
 
   rafId=requestAnimationFrame(animBrain);
 }
@@ -764,7 +836,7 @@ function animBrain(ts){
 initBrain();
 resizeBrain();
 requestAnimationFrame(animBrain);
-window.addEventListener('resize',()=>{ resizeBrain(); });
+window.addEventListener('resize',()=>resizeBrain());
 
 // ── SCROLL LINE EFFECT ──
 window.addEventListener('scroll',()=>{
@@ -900,8 +972,8 @@ function renderRules(){
     const div=document.createElement('div');
     div.className='rule-item'+(r.checked?' checked':'');
     div.dataset.id=r.id;
-    div.innerHTML=`<div class="rule-check">${checkSVG}</div><span class="rule-text">${r.text}</span><button class="rule-del" data-del="${r.id}" type="button">✕</button>`;
-    div.addEventListener('click',e=>{if(e.target.closest('[data-del]'))return;toggleRule(r.id);});
+    div.innerHTML=`<div class="rule-check">${checkSVG}</div><span class="rule-text">${r.text}</span><button class="rule-edit" data-edit="${r.id}" type="button" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="rule-del" data-del="${r.id}" type="button" title="Delete">${trashSVG}</button>`;
+    div.addEventListener('click',e=>{if(e.target.closest('[data-del]')||e.target.closest('[data-edit]'))return;toggleRule(r.id);});
     list.appendChild(div);
   });
   updateRulesProgress();
@@ -924,9 +996,30 @@ function updateRulesProgress(){
 }
 
 document.getElementById('rulesList').addEventListener('click',e=>{
-  const del=e.target.closest('[data-del]');if(!del)return;
-  rules=rules.filter(r=>String(r.id)!==del.dataset.del);
-  localStorage.setItem('tf_rules',JSON.stringify(rules));renderRules();
+  // Delete
+  const del=e.target.closest('[data-del]');
+  if(del){
+    rules=rules.filter(r=>String(r.id)!==del.dataset.del);
+    localStorage.setItem('tf_rules',JSON.stringify(rules));renderRules();return;
+  }
+  // Edit
+  const edit=e.target.closest('[data-edit]');
+  if(edit){
+    const r=rules.find(x=>String(x.id)===edit.dataset.edit);if(!r)return;
+    const span=document.querySelector(`.rule-text[data-ruleid="${r.id}"]`);if(!span)return;
+    const input=document.createElement('input');
+    input.type='text'; input.value=r.text;
+    input.style.cssText='flex:1;font-size:14px;padding:2px 6px;background:transparent;border:none;border-bottom:1px solid var(--neon);color:var(--text);font-family:inherit;outline:none;';
+    span.replaceWith(input); input.focus(); input.select();
+    function saveEdit(){
+      const newText=input.value.trim();
+      if(newText) r.text=newText;
+      localStorage.setItem('tf_rules',JSON.stringify(rules));
+      renderRules(); SFX.check();
+    }
+    input.addEventListener('blur',saveEdit);
+    input.addEventListener('keydown',e2=>{if(e2.key==='Enter')saveEdit();if(e2.key==='Escape')renderRules();});
+  }
 });
 
 document.getElementById('addRuleBtn').addEventListener('click',()=>{
@@ -939,6 +1032,7 @@ document.getElementById('addRuleBtn').addEventListener('click',()=>{
 document.getElementById('newRuleInput').addEventListener('keydown',e=>{if(e.key==='Enter'){document.getElementById('addRuleBtn').click();}});
 
 document.getElementById('resetRulesBtn').addEventListener('click',()=>{
+  if(!confirm('Reset all rules for today? This will uncheck everything.')) return;
   rules.forEach(r=>r.checked=false);
   localStorage.setItem('tf_rules',JSON.stringify(rules));renderRules();
 });
@@ -1119,14 +1213,21 @@ function calcWR(){
 function renderWRHistory(){
   const hist=document.getElementById('wrHistory');hist.innerHTML='';
   if(!trades.length){hist.innerHTML='<div class="empty-state">No trades logged</div>';return;}
-  [...trades].reverse().slice(0,10).forEach(t=>{
+  [...trades].reverse().slice(0,10).forEach((t,i)=>{
+    const actualIdx=trades.length-1-i;
     const div=document.createElement('div');div.className='wr-entry';
     const tagClass=t.o==='win'?'win':t.o==='loss'?'loss':'be';
     const label=t.o==='win'?'WIN':t.o==='loss'?'LOSS':'BE';
-    div.innerHTML=`<span class="wr-tag ${tagClass}">${label}</span><span style="color:var(--muted);flex:1;text-align:right">${t.rr?t.rr+'R':'—'}</span><span style="color:var(--dim);margin-left:8px">${new Date(t.ts).toLocaleDateString([],{month:'short',day:'numeric'})}</span>`;
+    div.innerHTML=`<span class="wr-tag ${tagClass}">${label}</span><span style="color:var(--muted);flex:1;text-align:right">${t.rr?t.rr+'R':'—'}</span><span style="color:var(--dim);margin-left:8px">${new Date(t.ts).toLocaleDateString([],{month:'short',day:'numeric'})}</span><button class="btn icon-btn ghost" data-idx="${actualIdx}" type="button" style="margin-left:6px;width:28px;height:28px;flex-shrink:0">${trashSVG}</button>`;
     hist.appendChild(div);
   });
 }
+document.getElementById('wrHistory').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-idx]');if(!btn)return;
+  trades.splice(parseInt(btn.dataset.idx),1);
+  localStorage.setItem('tf_trades',JSON.stringify(trades));
+  calcWR();renderWRHistory();SFX.click();
+});
 document.getElementById('addTradeBtn').addEventListener('click',()=>{
   const o=document.getElementById('tradeOutcome').value;
   const rr=parseFloat(document.getElementById('tradeRR').value)||null;
@@ -1179,12 +1280,6 @@ document.getElementById('geminiModel').addEventListener('change',e=>{
 });
 document.getElementById('forgetKeyBtn').addEventListener('click',()=>{localStorage.removeItem('tf_geminiKey');updateKeyStatus();});
 
-function addMsg(role,text){
-  const div=document.createElement('div');div.className='msg '+role;
-  div.innerHTML=`<div class="bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
-  chatBox.appendChild(div);chatBox.scrollTop=chatBox.scrollHeight;
-  if(role==='assistant') speak(text);
-}
 function demoReply(p){
   p=p.toLowerCase();
   if(p.includes('fomo')) return "FOMO is a tax on impatience. Wait for your edge. No setup — no trade. The market will always give another opportunity.";
@@ -1196,29 +1291,101 @@ function demoReply(p){
   const reps=["Trade less, trade bigger. Quality over quantity always.","Calm mind, clear charts. Emotions are just noise.","You don't need to be right. You need to manage risk.","Fix the person — the P&L fixes itself.","Consistency beats intensity. Show up, wait, execute."];
   return reps[Math.floor(Math.random()*reps.length)];
 }
-async function callGemini(prompt,key){
+// chat history for full context
+let chatHistory = [];
+
+const SYSTEM_PROMPT = `You are an elite trading mindset coach. You have deep knowledge of trading psychology, prop firm challenges, discipline, risk management, and emotional control.
+
+ALWAYS reply in structured points like this:
+• Point one here
+• Point two here
+• Point three here
+
+Rules:
+- Use bullet points (•) for every response
+- Be direct, practical, and specific
+- No fluff, no generic advice
+- Max 5-6 bullet points per reply
+- Reference what the trader said earlier in the conversation when relevant
+- End with one strong closing line (no bullet) that motivates action`;
+
+function formatBubble(text){
+  // Convert • points to styled list, bold **text**, line breaks
+  const lines = text.split('\n').filter(l=>l.trim());
+  return lines.map(line=>{
+    line = line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    if(line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')){
+      const content = line.replace(/^[\s•\-\*]+/,'');
+      return `<div style="display:flex;gap:8px;margin:3px 0"><span style="color:var(--neon);flex-shrink:0;margin-top:2px">•</span><span>${content}</span></div>`;
+    }
+    return `<div style="margin:5px 0;${line.length<60?'font-weight:600':''}>${line}</div>`;
+  }).join('');
+}
+
+function addMsg(role,text,isHTML=false){
+  const div=document.createElement('div');div.className='msg '+role;
+  const content = isHTML ? text : formatBubble(text);
+  div.innerHTML=`<div class="bubble">${content}</div>`;
+  chatBox.appendChild(div);chatBox.scrollTop=chatBox.scrollHeight;
+  if(role==='assistant' && !isHTML) speak(text.replace(/<[^>]*>/g,'').replace(/•/g,'').trim());
+}
+
+async function callGemini(key){
   const model=localStorage.getItem('tf_geminiModel')||'gemini-flash-latest';
   const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
-  const body={contents:[{role:"user",parts:[{text:`You are a trading mindset coach. Be direct, practical, and encouraging. Focus on discipline, patience, and risk management. Give a complete, helpful response. User: ${prompt}`}]}],generationConfig:{temperature:0.7,maxOutputTokens:800}};
+  // Build contents with system prompt as first user turn + history
+  const contents=[
+    {role:"user",parts:[{text:SYSTEM_PROMPT}]},
+    {role:"model",parts:[{text:"Understood. I am your trading mindset coach. I will reply in structured bullet points, be direct, and reference our conversation context. Ready."}]},
+    ...chatHistory
+  ];
+  const body={contents,generationConfig:{temperature:0.75,maxOutputTokens:800}};
   const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!res.ok)throw new Error('API error '+res.status);
   const data=await res.json();
   return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||"No response.";
 }
+
 async function sendMessage(){
   const text=chatInput.value.trim();if(!text)return;
+  // Add to history
+  chatHistory.push({role:"user",parts:[{text}]});
   addMsg('user',text);chatInput.value='';
   const key=localStorage.getItem('tf_geminiKey');
-  if(!key){setTimeout(()=>addMsg('assistant',demoReply(text)),300);return;}
-  addMsg('assistant','Thinking...');
-  const thinking=chatBox.lastElementChild;
-  try{const reply=await callGemini(text,key);thinking.querySelector('.bubble').textContent=reply;speak(reply);}
-  catch(e){thinking.querySelector('.bubble').textContent='Error: '+e.message+' — Using demo mode.';setTimeout(()=>addMsg('assistant',demoReply(text)),400);}
+  if(!key){
+    const reply=demoReply(text);
+    chatHistory.push({role:"model",parts:[{text:reply}]});
+    setTimeout(()=>addMsg('assistant',reply),300);
+    return;
+  }
+  // Thinking indicator
+  const thinking=document.createElement('div');thinking.className='msg assistant';
+  thinking.innerHTML=`<div class="bubble" style="display:flex;gap:6px;align-items:center"><span style="color:var(--neon)">•</span><span style="color:var(--muted)">Thinking...</span></div>`;
+  chatBox.appendChild(thinking);chatBox.scrollTop=chatBox.scrollHeight;
+  try{
+    const reply=await callGemini(key);
+    chatHistory.push({role:"model",parts:[{text:reply}]});
+    chatBox.removeChild(thinking);
+    addMsg('assistant',reply);
+  }catch(e){
+    chatBox.removeChild(thinking);
+    const errMsg='Error: '+e.message+' — switching to demo mode.';
+    const fallback=demoReply(text);
+    chatHistory.push({role:"model",parts:[{text:fallback}]});
+    addMsg('assistant',errMsg+'\n\n'+fallback);
+  }
 }
 document.getElementById('sendChatBtn').addEventListener('click',sendMessage);
 chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage();}});
 document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{chatInput.value=ch.dataset.prompt;sendMessage();}));
-addMsg('assistant',"Ready. Ask about discipline, FOMO, patience, or losing streaks. Patience > Predictions.");
+addMsg('assistant','• Ready to coach you through anything\n• Ask about FOMO, revenge trading, losing streaks, patience, or discipline\n• I remember our full conversation — so build on what we discuss\n\nPatience > Predictions. What is on your mind?',false);
+
+document.getElementById('clearChatBtn').addEventListener('click',()=>{
+  chatHistory=[];
+  chatBox.innerHTML='';
+  addMsg('assistant','• Conversation cleared\n• Starting fresh — what is on your mind?',false);
+  SFX.click();
+});
 
 // ── EXPORT / IMPORT ──
 document.getElementById('exportBtn').addEventListener('click',()=>{
